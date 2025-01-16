@@ -1,0 +1,20 @@
+{
+  "name": "online-nertz",
+  "version": "1.0.0",
+  "description": "online  multiplayer version of the speed-based card game Nertz.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pancake423/online-nertz.git"
+  },
+  "author": "pancake423",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pancake423/online-nertz/issues"
+  },
+  "homepage": "https://github.com/pancake423/online-nertz#readme"
+}
