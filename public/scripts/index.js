@@ -1,6 +1,7 @@
 import * as ss from "/scripts/spritesheet.js";
 import { mat3, mat4 } from "/gl-matrix/index.js"; // for future reference
 import { Game } from "/shared/game-logic.js";
+import * as renderer from "/scripts/gl-renderer.js";
 
 var c;
 var ctx;
@@ -9,6 +10,7 @@ const g = new Game(4);
 console.log(g);
 
 window.onload = () => {
+  renderer.init(document.getElementById("gl"));
   c = document.getElementById("c");
   ctx = c.getContext("2d");
 
