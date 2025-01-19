@@ -10,24 +10,28 @@ const g = new Game(4);
 console.log(g);
 
 window.onload = () => {
-  renderer.init(document.getElementById("gl"));
-  c = document.getElementById("c");
-  ctx = c.getContext("2d");
+  renderer.init(document.getElementById("c")).then(() => {
+    renderer.setCamera(4);
+    renderer.clear();
 
-  const spriteSheets = ss.makeSpriteSheets([
-    ["blue", "classic"],
-    ["red", "classic"],
-  ]);
-  console.log(ss.getFaceLoc("hearts", "3"));
-  console.log(ss.getBackLoc(1));
+    const spriteSheets = ss.makeSpriteSheets([
+      ["blue", "classic"],
+      ["red", "classic"],
+    ]);
 
-  for (let i = 0; i < spriteSheets.length; i++) {
-    ctx.drawImage(
-      spriteSheets[i],
-      (spriteSheets[i].width / 2) * Math.floor(i / 2),
-      (spriteSheets[i].height / 2) * (i % 2),
-      spriteSheets[i].width / 2,
-      spriteSheets[i].height / 2,
+    renderer.loadTextures(spriteSheets, ss.SHEET_DIMENSIONS);
+
+    renderer.drawCard(
+      [0, 0, 2.5], // note that cards are meant to be drawn with a depth equal to half the width of the playing area
+      [0, 0, 50],
+      ss.getFaceLoc("hearts", "A"),
+      ss.getBackLoc(1),
     );
-  }
+    renderer.drawCard(
+      [0.1, 0.5, 2.3],
+      [0, 180, 0],
+      ss.getFaceLoc("hearts", "A"),
+      ss.getBackLoc(0),
+    );
+  });
 };

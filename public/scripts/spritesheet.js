@@ -46,6 +46,7 @@ function makeSpriteSheets(playerCards) {
     const [color, design] = playerCards[i];
     addImageToSheet(cr.drawCardBack(color, design), "p" + i);
   }
+  console.log(CARD_LOOKUP);
 
   // return spritesheets as a list of image bitmaps.
   return SHEETS.map((c) => c.transferToImageBitmap());
@@ -88,4 +89,4 @@ function getBackLoc(playerID) {
   return CARD_LOOKUP["p" + playerID];
 }
 
-export { makeSpriteSheets, getFaceLoc, getBackLoc };
+export { SHEET_DIMENSIONS, makeSpriteSheets, getFaceLoc, getBackLoc };
