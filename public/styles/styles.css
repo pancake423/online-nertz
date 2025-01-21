@@ -1,0 +1,20 @@
+:root {
+    --canvas-size: min(100vw, 100vh);
+}
+body {
+    margin: 0;
+}
+#center {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+}
+
+.canvas {
+    position: absolute;
+    width: var(--canvas-size);
+    height: var(--canvas-size);
+}

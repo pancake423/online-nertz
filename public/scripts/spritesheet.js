@@ -46,6 +46,8 @@ function makeSpriteSheets(playerCards) {
     const [color, design] = playerCards[i];
     addImageToSheet(cr.drawCardBack(color, design), "p" + i);
   }
+  // add empty slot to sheet
+  addImageToSheet(cr.drawEmptySlot(), "empty");
   console.log(CARD_LOOKUP);
 
   // return spritesheets as a list of image bitmaps.
@@ -89,4 +91,14 @@ function getBackLoc(playerID) {
   return CARD_LOOKUP["p" + playerID];
 }
 
-export { SHEET_DIMENSIONS, makeSpriteSheets, getFaceLoc, getBackLoc };
+function getEmptyLoc() {
+  return CARD_LOOKUP["empty"];
+}
+
+export {
+  SHEET_DIMENSIONS,
+  makeSpriteSheets,
+  getFaceLoc,
+  getBackLoc,
+  getEmptyLoc,
+};

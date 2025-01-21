@@ -63,6 +63,9 @@ class Game {
       this.players.push(p);
     }
     this.foundations = [];
+    for (let i = 0; i < nPlayers * 4; i++) {
+      this.foundations.push([]);
+    }
   }
 }
 

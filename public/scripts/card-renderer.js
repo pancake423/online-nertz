@@ -158,7 +158,6 @@ function drawCardBack(color, design) {
   const ctx = c.getContext("2d");
   const roundingSize = Math.floor(CARD_W * CARD_ROUNDING_SIZE);
   const lineSize = Math.floor(CARD_W * CARD_LINE_THICKNESS);
-  const lineSpacing = Math.floor(CARD_W * CARD_LINE_SPACING);
 
   // fill background, draw border
   ctx.fillStyle = color;
@@ -197,14 +196,45 @@ function drawCardBack(color, design) {
   }
 
   // ensure that pixels are only drawn in the correct area
+  maskCard(ctx);
+
+  return c.transferToImageBitmap();
+}
+
+// dotted outline to show where valid card stacks can go
+function drawEmptySlot() {
+  const c = new OffscreenCanvas(CARD_W, CARD_H);
+  const ctx = c.getContext("2d");
+  const roundingSize = Math.floor(CARD_W * CARD_ROUNDING_SIZE);
+  const lineSize = Math.floor(CARD_W * CARD_LINE_THICKNESS);
+  const lineSpacing = Math.floor(CARD_W * CARD_LINE_SPACING);
+  roundedRect(
+    ctx,
+    lineSize,
+    lineSize,
+    CARD_W - lineSize * 2,
+    CARD_H - lineSize * 2,
+    roundingSize,
+  );
+  ctx.setLineDash([lineSpacing, lineSpacing]);
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = lineSize * 2;
+  ctx.stroke();
+  //maskCard(ctx);
+
+  return c.transferToImageBitmap();
+}
+
+// ensure that pixels are only drawn in the correct area
+function maskCard(ctx) {
+  const roundingSize = Math.floor(CARD_W * CARD_ROUNDING_SIZE);
   const mask = new OffscreenCanvas(CARD_W, CARD_H);
   const maskCtx = mask.getContext("2d");
   roundedRect(maskCtx, 0, 0, CARD_W, CARD_H, roundingSize);
   maskCtx.fill();
   ctx.globalCompositeOperation = "destination-in";
   ctx.drawImage(mask.transferToImageBitmap(), 0, 0);
-
-  return c.transferToImageBitmap();
+  ctx.globalCompositeOperation = "source-over"; // reset to default
 }
 
 // =============================================================
@@ -218,4 +248,5 @@ export {
   BACK_DESIGNS,
   drawCardFace,
   drawCardBack,
+  drawEmptySlot,
 };

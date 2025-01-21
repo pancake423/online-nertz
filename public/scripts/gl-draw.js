@@ -28,7 +28,7 @@ let UNIFORM_NAMES = [
 returns a promise that resolves when both the fragment shader
 and vertex shader have been loaded and compiled.
 */
-function init(canvas) {
+async function init(canvas) {
   GL = canvas.getContext("webgl2");
   GL.enable(GL.DEPTH_TEST);
   GL.depthFunc(GL.LEQUAL);
@@ -58,22 +58,15 @@ function init(canvas) {
     [0, 1],
   ];
 
-  let vs;
-  let fs;
-  return fetch("scripts/vertex.glsl")
-    .then((res) => res.text())
-    .then((text) => (vs = text))
-    .then((_) => fetch("scripts/fragment.glsl"))
-    .then((res) => res.text())
-    .then((text) => (fs = text))
-    .then((_) => {
-      PROGRAM = initProgram(GL, vs, fs);
-      UNIFORM_LOC = getUniformLocations(GL, PROGRAM, UNIFORM_NAMES);
-      // load data into buffers
-      initBuffer(GL, PROGRAM, "a_pos", vertexData);
-      initBuffer(GL, PROGRAM, "a_normal", normalData);
-      initBuffer(GL, PROGRAM, "a_tex_coords", uvData);
-    });
+  let vs = await fetch("scripts/vertex.glsl").then((res) => res.text());
+  let fs = await fetch("scripts/fragment.glsl").then((res) => res.text());
+
+  PROGRAM = initProgram(GL, vs, fs);
+  UNIFORM_LOC = getUniformLocations(GL, PROGRAM, UNIFORM_NAMES);
+  // load data into buffers
+  initBuffer(GL, PROGRAM, "a_pos", vertexData);
+  initBuffer(GL, PROGRAM, "a_normal", normalData);
+  initBuffer(GL, PROGRAM, "a_tex_coords", uvData);
 }
 
 /*
@@ -191,7 +184,7 @@ and therefore the number of cards we need to fit on screen.
 
 windowSize is the number of cards tall that the playing area needs to be.
 */
-function setCamera(windowSize) {
+function setCamera(fov, maxDepth) {
   /*
   needs to set uniforms:
   u_view_mat
@@ -200,13 +193,7 @@ function setCamera(windowSize) {
   const viewMat = mat4.create();
   mat4.lookAt(viewMat, [0, 0, 0], [0, 0, 1], [0, 1, 0]);
 
-  const projMat = mat4.perspective(
-    mat4.create(),
-    Math.PI / 2,
-    1,
-    1,
-    windowSize + 1,
-  );
+  const projMat = mat4.perspective(mat4.create(), fov, 1, 1, maxDepth);
 
   console.log(viewMat, projMat);
 
@@ -214,4 +201,8 @@ function setCamera(windowSize) {
   GL.uniformMatrix4fv(UNIFORM_LOC["u_proj_mat"], false, projMat);
 }
 
-export { init, drawCard, setCamera, loadTextures, clear };
+function updateWindowSize() {
+  GL.viewport(0, 0, GL.canvas.width, GL.canvas.height);
+}
+
+export { init, drawCard, setCamera, loadTextures, clear, updateWindowSize };

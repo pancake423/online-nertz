@@ -7,7 +7,7 @@ in vec3 v_normal;
 in vec3 v_pos;
 
 const vec3 eye_pos = vec3(0, 0, 0);
-const float EPSILON = 0.7;
+const float EPSILON = 0.5;
 
 // specifies where to find the front and back textures
 // for the card. [texture, u, v]
@@ -50,5 +50,6 @@ void main() {
     }
     if (outputColor.a < EPSILON) {
         gl_FragDepth = 0.99; // do not draw transparent pixels over top of other pixels
+        outputColor = vec4(0, 0, 0, 0);
     }
 }
