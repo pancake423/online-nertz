@@ -1,6 +1,7 @@
-const WORK_PILES = 4;
-const NERTZ_PILE_SIZE = 13;
-const STOCK_FLIP_AMT = 3; // number of cards to flip from stock to waste in each step.
+// modifiable rules. TODO: how to modify them dynamically?
+let WORK_PILES = 4;
+let NERTZ_PILE_SIZE = 13;
+let STOCK_FLIP_AMT = 3; // number of cards to flip from stock to waste in each step.
 const VALUES = [
   "A",
   "2",

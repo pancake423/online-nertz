@@ -8,19 +8,19 @@ let RENDER_SCALE = 1;
 // z depth at which object should be rendered. determined by nr of players in the game.
 let DEPTH = 0;
 // dimensions of the grid where foundation piles are rendered.
-let FOUNDATION_DIMS = [0, 0];
-let PLAYER_OFFSET = 0;
-let GAME_SIZE = 0;
 
 const PADDING = 0.5; //unit is card height. Gap between separate blocks of cards
-const STACK_OFFSET = 0.1; // gap between cards that are associated together
-const CARD_THICKNESS = 0.01; // in z units
-const PILE_OFFSET = 0.004;
+const STACK_OFFSET = 0.15; // gap between cards that are associated together
+const CARD_THICKNESS = 0.008; // in z units
 
 const ANIM_SCALE_FACTOR = 1.25; // how much larger should cards look when picked up by one unit
 
 const BG_COLOR = "#2E7D32";
 const BG_ACCENT_COLOR = "#1B5E20";
+
+let PLAYER_SIZE = 0;
+let CENTER_SIZE = 0;
+let SIZE = 0;
 
 let bgCanvas;
 let bgctx;
@@ -50,19 +50,32 @@ function setCanvasSize() {
 function initDrawSpace(cardInfo) {
   const nPlayers = cardInfo.length;
 
-  FOUNDATION_DIMS = [4, nPlayers];
-  const centerSize = Math.max(
-    FOUNDATION_DIMS[0] * (1 + STACK_OFFSET),
-    FOUNDATION_DIMS[1] * (1 + STACK_OFFSET),
-  );
-  PLAYER_OFFSET = Math.min(1 + STACK_OFFSET * 13, 2 + STACK_OFFSET) + PADDING;
-  const size = centerSize + 2 * PLAYER_OFFSET + PADDING * 2;
+  // FIGURE OUT NEEDED SIZE OF THE PLAYING AREA
+  // sorry for yelling I had to rewrite this code three times
+  PLAYER_SIZE = PADDING + Math.max(STACK_OFFSET * 13 + 1, 2 + STACK_OFFSET);
+  CENTER_SIZE =
+    PADDING * 2 + Math.max(getTotalSize(4, true), getTotalSize(nPlayers));
+  if (nPlayers == 2) {
+    CENTER_SIZE = PADDING * 2 + getTotalSize(2);
+  }
+  SIZE = PLAYER_SIZE * 2 + CENTER_SIZE;
 
-  const d = ANIM_SCALE_FACTOR / (ANIM_SCALE_FACTOR - 1);
-  const theta = 2 * Math.atan(size / (2 * d));
-  GAME_SIZE = size;
-  DEPTH = d;
-  glr.setCamera(theta, d * 2);
+  DEPTH = ANIM_SCALE_FACTOR / (ANIM_SCALE_FACTOR - 1);
+  const theta = 2 * Math.atan(SIZE / (2 * DEPTH));
+  glr.setCamera(theta, DEPTH * 2);
+}
+
+function getTotalSize(nCards, xAxis = false) {
+  return nCards * (xAxis ? CARD_W / CARD_H : 1) + (nCards - 1) * STACK_OFFSET;
+}
+
+// TODO: are these canvas space pixels or actual screen space pixels?
+function pixelToScreen(x, y) {
+  return [0, 0];
+}
+
+function ScreenToGl(x, y) {
+  return [SIZE / 2 - x, SIZE / 2 - y];
 }
 
 function initGame(cardInfo) {
@@ -72,15 +85,22 @@ function initGame(cardInfo) {
   glr.loadTextures(spriteSheets, ss.SHEET_DIMENSIONS);
 }
 
-function drawPile(x, y, cards, rot) {
+function drawPile(x, y, cards, rot, origin) {
   if (cards.length == 0) {
-    glr.drawCard([x, y, DEPTH], rot, ss.getEmptyLoc(), ss.getEmptyLoc());
+    glr.drawCard(
+      [x, y, DEPTH],
+      rot,
+      origin,
+      ss.getEmptyLoc(),
+      ss.getEmptyLoc(),
+    );
   }
   for (let i = 0; i < cards.length; i++) {
     const card = cards[i];
     glr.drawCard(
-      [x + PILE_OFFSET * i, y + PILE_OFFSET * i, DEPTH - CARD_THICKNESS * i],
+      [x, y, DEPTH - CARD_THICKNESS * i],
       rot,
+      origin,
       ss.getFaceLoc(card[0], card[1]),
       ss.getBackLoc(card[2]),
     );
@@ -88,32 +108,79 @@ function drawPile(x, y, cards, rot) {
 }
 
 function draw(game, myPID) {
+  const nPlayers = game.players.length;
+  const cardWidth = CARD_W / CARD_H;
   drawBackground();
   glr.clear();
 
-  // draw the foundation piles in the center
-  let x = (FOUNDATION_DIMS[0] + STACK_OFFSET * (FOUNDATION_DIMS[0] - 1)) / -2;
-  let y = (FOUNDATION_DIMS[1] + STACK_OFFSET * (FOUNDATION_DIMS[1] - 1)) / -2;
-  for (let i = 0; i < game.foundations.length; i++) {
-    const dx = i % FOUNDATION_DIMS[0];
-    const dy = Math.floor(i / FOUNDATION_DIMS[0]);
+  // draw the foundation piles
+  let x = PLAYER_SIZE;
+  let y = PLAYER_SIZE;
+  let maxW = CENTER_SIZE;
+  let maxH = CENTER_SIZE;
 
+  let w = getTotalSize(4, true);
+  let h = getTotalSize(nPlayers);
+
+  x += (maxW - w + cardWidth) / 2;
+  y += (maxH - h + 1) / 2;
+
+  for (let i = 0; i < game.foundations.length; i++) {
+    const dx = (i % 4) * (cardWidth + STACK_OFFSET);
+    const dy = Math.floor(i / 4) * (1 + STACK_OFFSET);
     drawPile(
-      x + dx * (1 + STACK_OFFSET) + 0.5,
-      y + dy * (1 + STACK_OFFSET) + 0.5,
+      ...ScreenToGl(x + dx, y + dy),
       game.foundations[i],
+      [0, 0, 0],
       [0, 0, 0],
     );
   }
 
   // draw the player hands
-  const player = game.players[0];
-  const nPiles = player.workPiles.length + 1;
-  const sx = -nPiles / 2;
-  for (let i = 0; i < player.workPiles.length; i++) {
-    drawPile(sx + i + 0.5, PLAYER_OFFSET + 0.5, player.workPiles[i], [0, 0, 0]);
+  const positions = ["left", "right", "top", "bottom"];
+  drawPlayerHand(game.players[myPID], positions.pop());
+  for (let i = 0; i < nPlayers; i++) {
+    if (i == myPID) continue;
+    drawPlayerHand(game.players[i], positions.pop());
   }
-  drawPile(sx + nPiles - 0.5, PLAYER_OFFSET + 0.5, player.nertzPile, [0, 0, 0]);
+}
+
+function drawPlayerHand(hand, pos) {
+  let [[x, y], [dx, dy], theta] = getPos(pos);
+  const cardWidth = CARD_W / CARD_H;
+  const nPiles = hand.workPiles.length;
+  x -= ((getTotalSize(nPiles + 1, true) - cardWidth) * dx) / 2;
+  y -= ((getTotalSize(nPiles + 1, true) - cardWidth) * dy) / 2;
+
+  for (let i = 0; i < nPiles; i++) {
+    drawPile(...ScreenToGl(x, y), hand.workPiles[i], [0, 0, theta], [0, 0, 0]);
+    x += (cardWidth + STACK_OFFSET) * dx;
+    y += (cardWidth + STACK_OFFSET) * dy;
+  }
+  drawPile(...ScreenToGl(x, y), hand.nertzPile, [0, 0, theta], [0, 0, 0]);
+  x += (1 + STACK_OFFSET) * dy;
+  y += (1 + STACK_OFFSET) * dx;
+  drawPile(...ScreenToGl(x, y), hand.stock, [0, 180, theta], [0, 0, 0]);
+  x += (cardWidth + STACK_OFFSET) * dx;
+  y += (cardWidth + STACK_OFFSET) * dy;
+  drawPile(...ScreenToGl(x, y), hand.waste, [0, 0, theta], [0, 0, 0]);
+}
+
+function getPos(p) {
+  switch (p) {
+    case "bottom":
+      return [[SIZE / 2, SIZE - PLAYER_SIZE + 0.5], [1, 0], 0];
+    case "top":
+      return [[SIZE / 2, PLAYER_SIZE - 0.5], [-1, 0], 0];
+    case "left":
+      return [[PLAYER_SIZE - 0.5, SIZE / 2], [0, -1], 90];
+    case "right":
+      return [[SIZE - PLAYER_SIZE + 0.5, SIZE / 2], [0, 1], 90];
+  }
+}
+
+function toDegrees(rad) {
+  return (180 * rad) / Math.PI;
 }
 
 function drawBackground() {

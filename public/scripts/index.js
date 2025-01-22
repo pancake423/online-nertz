@@ -10,10 +10,10 @@ window.onload = async () => {
   renderer.initGame([
     ["blue", "classic"],
     ["red", "classic"],
-    ["yellow", "classic"],
+    //["yellow", "classic"],
     //["green", "classic"],
   ]);
 
-  const g = new Game(3);
+  const g = new Game(2);
   renderer.draw(g, 0);
 };

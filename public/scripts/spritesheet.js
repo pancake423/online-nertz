@@ -10,6 +10,7 @@ import * as cr from "/scripts/card-renderer.js";
 let CARD_LOOKUP = {};
 const SHEET_DIMENSIONS = [5, 3]; // 5 wide, 3 high (in cards)
 const N_SHEETS = 4;
+const PADDING = 2; // pixels
 let SHEETS = [];
 let SHEETS_CTX = [];
 let idx = [0, 0, 0];
@@ -29,8 +30,8 @@ function makeSpriteSheets(playerCards) {
   // initialize empty sprite sheets
   for (let i = 0; i < N_SHEETS; i++) {
     const c = new OffscreenCanvas(
-      cr.CARD_W * SHEET_DIMENSIONS[0],
-      cr.CARD_H * SHEET_DIMENSIONS[1],
+      (cr.CARD_W + 2 * PADDING) * SHEET_DIMENSIONS[0],
+      (cr.CARD_H + 2 * PADDING) * SHEET_DIMENSIONS[1],
     );
     SHEETS.push(c);
     SHEETS_CTX.push(c.getContext("2d"));
@@ -60,7 +61,11 @@ adds it to the card lookup table, and increments the spritesheet position.
 */
 function addImageToSheet(img, loc) {
   const ctx = SHEETS_CTX[idx[0]];
-  ctx.drawImage(img, idx[1] * cr.CARD_W, idx[2] * cr.CARD_H);
+  ctx.drawImage(
+    img,
+    idx[1] * (cr.CARD_W + 2 * PADDING) + PADDING,
+    idx[2] * (cr.CARD_H + 2 * PADDING) + PADDING,
+  );
   CARD_LOOKUP[loc] = idx;
   idx = nextIndex(idx);
 }

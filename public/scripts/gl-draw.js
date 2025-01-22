@@ -144,9 +144,13 @@ function loadTexture(image) {
 
 /*
 draws a playing card with the specified position and rotation.
+rotation is applied about the origin.
 faceLoc and backLoc specify which texture location to get the images from.
+
+TODO: consider refactoring, making a separate drawCard that accepts a pre-computed transformation matrix?
+in case this isn't sufficient for more complex cases down the line
 */
-function drawCard(pos, rot, faceLoc, backLoc) {
+function drawCard(pos, rot, origin, faceLoc, backLoc) {
   /*
   needs to set uniforms:
   u_model_mat
@@ -155,15 +159,14 @@ function drawCard(pos, rot, faceLoc, backLoc) {
   u_back_tex_idx
   */
   const q = quat.fromEuler(quat.create(), ...rot);
-  let modelMat = mat4.fromRotationTranslationScale(
+  let modelMat = mat4.fromRotationTranslationScaleOrigin(
     mat4.create(),
     q,
     pos,
     [1, 1, 1],
+    origin,
   );
   let modelNormal = mat3.normalFromMat4(mat3.create(), modelMat);
-
-  console.log(faceLoc);
 
   GL.uniform3fv(UNIFORM_LOC["u_front_tex_idx"], faceLoc);
   GL.uniform3fv(UNIFORM_LOC["u_back_tex_idx"], backLoc);

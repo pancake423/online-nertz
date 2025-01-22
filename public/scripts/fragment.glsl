@@ -7,7 +7,7 @@ in vec3 v_normal;
 in vec3 v_pos;
 
 const vec3 eye_pos = vec3(0, 0, 0);
-const float EPSILON = 0.5;
+const float EPSILON = 0.0;
 
 // specifies where to find the front and back textures
 // for the card. [texture, u, v]
