@@ -19,6 +19,26 @@ const VALUES = [
 ];
 const SUITS = ["spades", "hearts", "diamonds", "clubs"];
 
+// budget enums :)
+const COLORS = {
+  BLACK: 0,
+  RED: 1,
+};
+const PILES = {
+  WORK: 0,
+  NERTZ: 1,
+  FOUNDATION: 2,
+  STOCK: 3,
+  WASTE: 4,
+};
+
+const SUIT_COLORS = {
+  spades: COLORS.BLACK,
+  clubs: COLORS.BLACK,
+  hearts: COLORS.RED,
+  diamonds: COLORS.RED,
+};
+
 class Deck {
   constructor(pid) {
     this.cards = [];
@@ -68,6 +88,136 @@ class Game {
       this.foundations.push([]);
     }
   }
+  checkValidMove(move) {
+    const [pid, nCards, fromLoc, fromPile, toLoc, toPile] = move;
+    // first check for valid PID
+    if (pid < 0 || pid >= this.players.length) return false;
+    // check for valid locations
+    if (
+      !this.#checkValidPile(fromLoc, fromPile) ||
+      !this.#checkValidPile(toLoc, toPile)
+    )
+      return false;
+    // you can only move one card at a time unless both the target and destination are work piles.
+    if (
+      nCards < 1 ||
+      (nCards > 1 && (fromLoc != PILES.WORK || toLoc != PILES.WORK))
+    )
+      return false;
+
+    // you can never take a card out of a foundation pile.
+    if (fromLoc == PILES.FOUNDATION) return false;
+    // you can never put a card onto a nertz pile.
+    if (toLoc == PILES.NERTZ) return false;
+
+    // move type: stock to waste. valid as long as there are cards in stock
+    if (
+      fromLoc == PILES.STOCK &&
+      toLoc == PILES.WASTE &&
+      this.#getPileContents(pid, fromLoc, fromPile).length > 0
+    )
+      return true;
+    // move type: waste to stock. only valid if there are no cards in stock
+    if (
+      fromLoc == PILES.WASTE &&
+      toLoc == PILES.STOCK &&
+      this.#getPileContents(pid, toLoc, toPile).length == 0
+    )
+      return true;
+    // otherwise, you can't put a card into stock or waste.
+    if (toLoc == PILES.STOCK || toLoc == PILES.WASTE) return false;
+    /*
+    move type: any other. the bottom card of the pile we are moving must "match"
+    with the top card of the destination pile. if the destination pile is a work pile, that means alternating color and descending.
+    otherwise, it must be matching suit and ascending.
+    */
+    const destPile = this.#getPileContents(pid, toLoc, toPile);
+    const startPile = this.#getPileContents(pid, fromLoc, fromPile);
+    // can't move cards from an empty pile :)
+    if (startPile.length == 0) return false;
+    const firstStartCard = startPile[startPile.length - nCards];
+    // you can always move cards to an empty work pile. you can only move aces to empty foundation piles.
+    if (destPile.length == 0) {
+      if (toLoc == PILES.FOUNDATION && firstStartCard[1] != "A") {
+        return false;
+      } else return true;
+    }
+    const lastDestCard = destPile[destPile.length - 1];
+    if (
+      toLoc == PILES.WORK &&
+      SUIT_COLORS[firstStartCard[0]] != SUIT_COLORS[lastDestCard[0]] &&
+      // the last destination card is one higher than the first card that we moved
+      VALUES.indexOf(lastDestCard[1]) - VALUES.indexOf(firstStartCard[1]) == 1
+    )
+      return true;
+    if (
+      toLoc == PILES.FOUNDATION &&
+      firstStartCard[0] == lastDestCard[0] &&
+      // the card we moved is one higher than the card its going on top of
+      VALUES.indexOf(firstStartCard[1]) - VALUES.indexOf(lastDestCard[1]) == 1
+    )
+      return true;
+    // not matching any of the valid cases, so must be invalid by default
+    return false;
+  }
+  #checkValidPile(loc, pile) {
+    switch (loc) {
+      case PILES.NERTZ:
+      case PILES.STOCK:
+      case PILES.WASTE:
+        return pile == 0; // there is only one of these piles
+      case PILES.WORK:
+        return pile >= 0 && pile < WORK_PILES;
+      case PILES.FOUNDATION:
+        return pile >= 0 && pile < this.foundations.length;
+      default:
+        return false; // loc is invalid, pile is automatically invalid
+    }
+  }
+  #getPileContents(pid, loc, pile) {
+    switch (loc) {
+      case PILES.NERTZ:
+        return this.players[pid].nertzPile;
+      case PILES.STOCK:
+        return this.players[pid].stock;
+      case PILES.WASTE:
+        return this.players[pid].waste;
+      case PILES.WORK:
+        return this.players[pid].workPiles[pile];
+      case PILES.FOUNDATION:
+        return this.foundations[pile];
+      default:
+        throw new RangeError(
+          `invalid loc value '${loc}' to Game.#getPileContents`,
+        );
+        return []; // how did you get here?
+    }
+  }
+
+  makeMove(move) {
+    const [pid, nCards, fromLoc, fromPile, toLoc, toPile] = move;
+    if (!this.checkValidMove(move)) return;
+
+    const to = this.#getPileContents(pid, toLoc, toPile);
+    const from = this.#getPileContents(pid, fromLoc, fromPile);
+    let nToMove = nCards;
+
+    // special moves
+    // reset stock pile
+    if (fromLoc == PILES.WASTE && toLoc == PILES.STOCK) {
+      // move every card
+      nToMove = from.length;
+    }
+    // move stock to waste
+    if (fromLoc == PILES.STOCK && toLoc == PILES.WASTE) {
+      // move STOCK_FLIP_AMT (unless there are less cards than that available)
+      nToMove = Math.min(from.length, STOCK_FLIP_AMT);
+    }
+
+    // grab the number of cards necessary and move them to the new pile
+    const moveCards = from.splice(from.length - nToMove, nToMove);
+    to.push(...moveCards);
+  }
 }
 
-export { Game };
+export { Game, PILES };
