@@ -11,6 +11,7 @@ let DEPTH = 0;
 
 const PADDING = 0.5; //unit is card height. Gap between separate blocks of cards
 const STACK_OFFSET = 0.15; // gap between cards that are associated together
+const CARD_OFFSET = 0.15;
 const CARD_THICKNESS = 0.008; // in z units
 
 const ANIM_SCALE_FACTOR = 1.25; // how much larger should cards look when picked up by one unit
@@ -52,7 +53,7 @@ function initDrawSpace(cardInfo) {
 
   // FIGURE OUT NEEDED SIZE OF THE PLAYING AREA
   // sorry for yelling I had to rewrite this code three times
-  PLAYER_SIZE = PADDING + Math.max(STACK_OFFSET * 13 + 1, 2 + STACK_OFFSET);
+  PLAYER_SIZE = Math.max(CARD_OFFSET * 13 + 1, PADDING + 2 + STACK_OFFSET);
   CENTER_SIZE =
     PADDING * 2 + Math.max(getTotalSize(4, true), getTotalSize(nPlayers));
   if (nPlayers == 2) {
@@ -85,7 +86,7 @@ function initGame(cardInfo) {
   glr.loadTextures(spriteSheets, ss.SHEET_DIMENSIONS);
 }
 
-function drawPile(x, y, cards, rot, origin) {
+function drawPile(x, y, cards, rot, origin, offset = 0) {
   if (cards.length == 0) {
     glr.drawCard(
       [x, y, DEPTH],
@@ -95,10 +96,14 @@ function drawPile(x, y, cards, rot, origin) {
       ss.getEmptyLoc(),
     );
   }
+  const theta = toRadians(rot[2] - 90);
+  const dx = Math.cos(theta) * offset;
+  const dy = Math.sin(theta) * offset;
+
   for (let i = 0; i < cards.length; i++) {
     const card = cards[i];
     glr.drawCard(
-      [x, y, DEPTH - CARD_THICKNESS * i],
+      [x + dx * i, y + dy * i, DEPTH - CARD_THICKNESS * i],
       rot,
       origin,
       ss.getFaceLoc(card[0], card[1]),
@@ -153,7 +158,13 @@ function drawPlayerHand(hand, pos) {
   y -= ((getTotalSize(nPiles + 1, true) - cardWidth) * dy) / 2;
 
   for (let i = 0; i < nPiles; i++) {
-    drawPile(...ScreenToGl(x, y), hand.workPiles[i], [0, 0, theta], [0, 0, 0]);
+    drawPile(
+      ...ScreenToGl(x, y),
+      hand.workPiles[i],
+      [0, 0, theta],
+      [0, 0, 0],
+      CARD_OFFSET,
+    );
     x += (cardWidth + STACK_OFFSET) * dx;
     y += (cardWidth + STACK_OFFSET) * dy;
   }
@@ -182,6 +193,9 @@ function getPos(p) {
 function toDegrees(rad) {
   return (180 * rad) / Math.PI;
 }
+function toRadians(deg) {
+  return (Math.PI * deg) / 180;
+}
 
 function drawBackground() {
   const ctx = bgctx;
@@ -190,4 +204,31 @@ function drawBackground() {
   ctx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
 }
 
-export { init, initGame, draw };
+function getLayout() {
+  return {
+    PLAYER_SIZE: PLAYER_SIZE,
+    CENTER_SIZE: CENTER_SIZE,
+    SIZE: SIZE,
+    STACK_OFFSET: STACK_OFFSET,
+    CARD_OFFSET: CARD_OFFSET,
+    CARD_W: CARD_W,
+    CARD_H: CARD_H,
+  };
+}
+
+function startCardDrag(pid, nCards, fromLoc, fromPile) {}
+
+function setDragPos(x, y) {}
+
+function endCardDrag() {}
+
+export {
+  init,
+  initGame,
+  draw,
+  getLayout,
+  startCardDrag,
+  setDragPos,
+  endCardDrag,
+  getTotalSize,
+};

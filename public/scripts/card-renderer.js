@@ -148,6 +148,18 @@ function drawCardFace(suit, value) {
     CARD_W - paddingX - (stampSize - smallStampSize) / 2 - smallStampSize,
     CARD_H - paddingY - stampSize - smallStampSize,
   );
+  ctx.globalAlpha = 0.4;
+  ctx.drawImage(
+    rotateStamp(suitStampSmall, Math.PI),
+    paddingX + (stampSize - smallStampSize) / 2,
+    CARD_H - paddingY - (stampSize - smallStampSize) / 2 - smallStampSize,
+  );
+  ctx.drawImage(
+    suitStampSmall,
+    CARD_W - paddingX - (stampSize - smallStampSize) / 2 - smallStampSize,
+    paddingY + (stampSize - smallStampSize) / 2,
+  );
+  ctx.globalAlpha = 1;
 
   return c.transferToImageBitmap();
 }

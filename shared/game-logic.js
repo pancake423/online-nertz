@@ -25,6 +25,7 @@ const COLORS = {
   RED: 1,
 };
 const PILES = {
+  INVALID: -1,
   WORK: 0,
   NERTZ: 1,
   FOUNDATION: 2,
@@ -114,14 +115,14 @@ class Game {
     if (
       fromLoc == PILES.STOCK &&
       toLoc == PILES.WASTE &&
-      this.#getPileContents(pid, fromLoc, fromPile).length > 0
+      this.getPileContents(pid, fromLoc, fromPile).length > 0
     )
       return true;
     // move type: waste to stock. only valid if there are no cards in stock
     if (
       fromLoc == PILES.WASTE &&
       toLoc == PILES.STOCK &&
-      this.#getPileContents(pid, toLoc, toPile).length == 0
+      this.getPileContents(pid, toLoc, toPile).length == 0
     )
       return true;
     // otherwise, you can't put a card into stock or waste.
@@ -131,8 +132,8 @@ class Game {
     with the top card of the destination pile. if the destination pile is a work pile, that means alternating color and descending.
     otherwise, it must be matching suit and ascending.
     */
-    const destPile = this.#getPileContents(pid, toLoc, toPile);
-    const startPile = this.#getPileContents(pid, fromLoc, fromPile);
+    const destPile = this.getPileContents(pid, toLoc, toPile);
+    const startPile = this.getPileContents(pid, fromLoc, fromPile);
     // can't move cards from an empty pile :)
     if (startPile.length == 0) return false;
     const firstStartCard = startPile[startPile.length - nCards];
@@ -174,7 +175,7 @@ class Game {
         return false; // loc is invalid, pile is automatically invalid
     }
   }
-  #getPileContents(pid, loc, pile) {
+  getPileContents(pid, loc, pile) {
     switch (loc) {
       case PILES.NERTZ:
         return this.players[pid].nertzPile;
@@ -198,24 +199,28 @@ class Game {
     const [pid, nCards, fromLoc, fromPile, toLoc, toPile] = move;
     if (!this.checkValidMove(move)) return;
 
-    const to = this.#getPileContents(pid, toLoc, toPile);
-    const from = this.#getPileContents(pid, fromLoc, fromPile);
+    const to = this.getPileContents(pid, toLoc, toPile);
+    const from = this.getPileContents(pid, fromLoc, fromPile);
     let nToMove = nCards;
+    let reverse = false;
 
     // special moves
     // reset stock pile
     if (fromLoc == PILES.WASTE && toLoc == PILES.STOCK) {
       // move every card
       nToMove = from.length;
+      reverse = true;
     }
     // move stock to waste
     if (fromLoc == PILES.STOCK && toLoc == PILES.WASTE) {
       // move STOCK_FLIP_AMT (unless there are less cards than that available)
       nToMove = Math.min(from.length, STOCK_FLIP_AMT);
+      reverse = true;
     }
 
     // grab the number of cards necessary and move them to the new pile
     const moveCards = from.splice(from.length - nToMove, nToMove);
+    if (reverse) moveCards.reverse();
     to.push(...moveCards);
   }
 }
