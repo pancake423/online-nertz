@@ -1,17 +1,24 @@
 import { PILES } from "/shared/game-logic.js";
+import { EventHandler } from "/scripts/events.js";
+import * as renderer from "/scripts/draw.js";
+import { State } from "/scripts/state.js";
+
+// card interaction listens for mouse events
+EventHandler.addEventListener("mousedown", onMouseDown);
+EventHandler.addEventListener("mouseup", onMouseUp);
+EventHandler.addEventListener("mousemove", onMouseMove);
+EventHandler.addEventListener("blur", onBlur);
+
+const PILE_LENIENCY = 0.007; // compensates for visual effect of stacked cards; makes piles clickable everywhere.
 
 let LAYOUT;
 let PILE_SELECTED = false;
 let C;
 let getTotalSize; // function
-let EH;
 
-const PILE_LENIENCY = 0.007; // compensates for visual effect of stacked cards; makes piles clickable everywhere.
-
-function init(renderer, eventHandler) {
+function init() {
   LAYOUT = renderer.getLayout();
   getTotalSize = renderer.getTotalSize;
-  EH = eventHandler;
   C = document.getElementById("c");
 }
 
@@ -92,13 +99,13 @@ function checkCollide(x, y, sx, sy, w, h) {
   return x >= sx && x <= sx + w && y >= sy && y <= sy + h;
 }
 
-function onMouseDown(game, pid, e) {
+function onMouseDown(e) {
   const [x, y] = globalToGameCoords(e.clientX, e.clientY);
-  const [loc, pile, nCards] = getSelectedCard(game, pid, x, y);
+  const [loc, pile, nCards] = getSelectedCard(State.game, State.MY_PID, x, y);
   if (loc == PILES.INVALID || loc == PILES.FOUNDATION) return;
   PILE_SELECTED = true;
-  EH.raiseEvent("selectpile", {
-    pid: pid,
+  EventHandler.raiseEvent("selectpile", {
+    pid: State.MY_PID,
     loc: loc,
     pile: pile,
     x: x,
@@ -107,24 +114,34 @@ function onMouseDown(game, pid, e) {
   });
 }
 
-function onMouseUp(game, pid, e) {
+function onMouseUp(e) {
   if (!PILE_SELECTED) return;
   PILE_SELECTED = false;
   const [x, y] = globalToGameCoords(e.clientX, e.clientY);
-  const [loc, pile, nCards] = getSelectedCard(game, pid, x, y);
-  EH.raiseEvent("releasepile", { pid: pid, loc: loc, pile: pile, x: x, y: y });
+  const [loc, pile, nCards] = getSelectedCard(State.game, State.MY_PID, x, y);
+  EventHandler.raiseEvent("releasepile", {
+    pid: State.MY_PID,
+    loc: loc,
+    pile: pile,
+    x: x,
+    y: y,
+  });
 }
 
-function onMouseMove(pid, e) {
+function onMouseMove(e) {
   if (!PILE_SELECTED) return;
   const [x, y] = globalToGameCoords(e.clientX, e.clientY);
-  EH.raiseEvent("movepile", { pid: pid, x: x, y: y });
+  EventHandler.raiseEvent("movepile", { pid: State.MY_PID, x: x, y: y });
 }
 
-function onBlur(pid, e) {
+function onBlur(e) {
   if (!PILE_SELECTED) return;
   PILE_SELECTED = false;
-  EH.raiseEvent("releasepile", { pid: pid, loc: PILES.INVALID, pile: -1 });
+  EventHandler.raiseEvent("releasepile", {
+    pid: State.MY_PID,
+    loc: PILES.INVALID,
+    pile: -1,
+  });
 }
 
 export { init, onMouseUp, onMouseDown, onMouseMove, onBlur };

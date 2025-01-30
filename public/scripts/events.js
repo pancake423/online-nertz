@@ -7,7 +7,9 @@ class EventHandler {
     "keydown",
     "blur",
   ];
-  constructor() {
+  static events = {};
+
+  static {
     this.events = {};
     // default events: mousemove, mouseup, mousedown, keyup, keydown
     for (const event of EventHandler.defaultEvents) {
@@ -17,12 +19,12 @@ class EventHandler {
     }
   }
 
-  addEventListener(eventName, func) {
+  static addEventListener(eventName, func) {
     if (!(eventName in this.events)) this.events[eventName] = [];
     this.events[eventName].push(func);
   }
 
-  raiseEvent(eventName, data, supress = false) {
+  static raiseEvent(eventName, data, supress = false) {
     if (!(eventName in this.events)) {
       if (!supress)
         console.warn(

@@ -1,6 +1,7 @@
 import * as glr from "/scripts/gl-draw.js";
 import * as ss from "/scripts/spritesheet.js";
 import { CARD_W, CARD_H } from "/scripts/card-renderer.js";
+import { State } from "/scripts/state.js";
 
 // scaling factor on canvases for performance reasons.
 // higher number = more scaling = lower res
@@ -112,8 +113,8 @@ function drawPile(x, y, cards, rot, origin, offset = 0) {
   }
 }
 
-function draw(game, myPID) {
-  const nPlayers = game.players.length;
+function draw() {
+  const nPlayers = State.game.players.length;
   const cardWidth = CARD_W / CARD_H;
   drawBackground();
   glr.clear();
@@ -130,12 +131,12 @@ function draw(game, myPID) {
   x += (maxW - w + cardWidth) / 2;
   y += (maxH - h + 1) / 2;
 
-  for (let i = 0; i < game.foundations.length; i++) {
+  for (let i = 0; i < State.game.foundations.length; i++) {
     const dx = (i % 4) * (cardWidth + STACK_OFFSET);
     const dy = Math.floor(i / 4) * (1 + STACK_OFFSET);
     drawPile(
       ...ScreenToGl(x + dx, y + dy),
-      game.foundations[i],
+      State.game.foundations[i],
       [0, 0, 0],
       [0, 0, 0],
     );
@@ -143,10 +144,10 @@ function draw(game, myPID) {
 
   // draw the player hands
   const positions = ["left", "right", "top", "bottom"];
-  drawPlayerHand(game.players[myPID], positions.pop());
+  drawPlayerHand(State.game.players[State.MY_PID], positions.pop());
   for (let i = 0; i < nPlayers; i++) {
-    if (i == myPID) continue;
-    drawPlayerHand(game.players[i], positions.pop());
+    if (i == State.MY_PID) continue;
+    drawPlayerHand(State.game.players[i], positions.pop());
   }
 }
 
