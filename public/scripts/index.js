@@ -15,12 +15,14 @@ import { EventHandler } from "/scripts/events.js";
 import * as cardInteraction from "/scripts/card-interaction.js";
 import { MoveTracker } from "/scripts/move-tracker.js"; // importing this registers its events
 import { State } from "/scripts/state.js";
+import { Client } from "/scripts/client.js";
 
 // some networking code eventually is going to handle the event when you request to make a move
 EventHandler.addEventListener("makemove", (e) => State.game.makeMove(e.move));
 
 // put modules into global namespace (for debug/testing)
 window.State = State;
+window.Client = Client;
 
 window.onload = async () => {
   await renderer.init();

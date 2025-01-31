@@ -1,5 +1,6 @@
 {
   "name": "online-nertz",
+  "type": "module",
   "version": "1.0.0",
   "description": "online  multiplayer version of the speed-based card game Nertz.",
   "main": "index.js",

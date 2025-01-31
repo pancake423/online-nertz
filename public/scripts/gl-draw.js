@@ -75,7 +75,6 @@ texInfo indicates the dimensions that sprites are packed into
 the spritesheets with.
 */
 function loadTextures(texList, sheetDimensions) {
-  console.log(texList);
   /*
   needs to set uniforms:
   u_tex1
@@ -197,8 +196,6 @@ function setCamera(fov, maxDepth) {
   mat4.lookAt(viewMat, [0, 0, 0], [0, 0, 1], [0, 1, 0]);
 
   const projMat = mat4.perspective(mat4.create(), fov, 1, 1, maxDepth);
-
-  console.log(viewMat, projMat);
 
   GL.uniformMatrix4fv(UNIFORM_LOC["u_view_mat"], false, viewMat);
   GL.uniformMatrix4fv(UNIFORM_LOC["u_proj_mat"], false, projMat);

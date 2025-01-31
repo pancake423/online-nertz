@@ -49,7 +49,6 @@ function makeSpriteSheets(playerCards) {
   }
   // add empty slot to sheet
   addImageToSheet(cr.drawEmptySlot(), "empty");
-  console.log(CARD_LOOKUP);
 
   // return spritesheets as a list of image bitmaps.
   return SHEETS.map((c) => c.transferToImageBitmap());
