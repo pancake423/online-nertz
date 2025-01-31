@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/pancake423/online-nertz/issues"
   },
-  "homepage": "https://github.com/pancake423/online-nertz#readme"
+  "homepage": "https://github.com/pancake423/online-nertz#readme",
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
 }
