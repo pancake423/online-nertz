@@ -57,8 +57,8 @@ function getSelectedCard(game, pid, x, y) {
   }
   // foundation piles
   const nPlayers = game.players.length;
-  cx = (LAYOUT.SIZE - getTotalSize(nPlayers, true)) / 2;
-  cy = (LAYOUT.SIZE - getTotalSize(4)) / 2;
+  cx = (LAYOUT.SIZE - getTotalSize(4, true)) / 2;
+  cy = (LAYOUT.SIZE - getTotalSize(nPlayers)) / 2;
   for (let i = 0; i < game.foundations.length; i++) {
     locations.push([
       cx + (i % 4) * wGap,

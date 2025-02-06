@@ -1,8 +1,14 @@
+@font-face {
+    font-family: "Organo";
+    src: url("/assets/Organo.ttf");
+}
+
 :root {
     --canvas-size: min(100vw, 100vh);
 }
 body {
     margin: 0;
+    font-family: "Organo";
 }
 #center {
     width: 100vw;

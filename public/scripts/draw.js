@@ -35,6 +35,7 @@ async function init() {
   setCanvasSize();
 
   await glr.init(glCanvas);
+  await document.fonts.ready; // to make sure that fonts are available in the canvas when we create a spritesheet
   window.onresize = () => {
     setCanvasSize();
     glr.updateWindowSize();

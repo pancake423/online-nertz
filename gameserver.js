@@ -20,7 +20,7 @@ class GameServer {
     };
 
     let id = generateID();
-    // will start to hang with thousands of games created, but what are the odds lol
+    // will start to hang with millions of games created, but what are the odds lol
     // ~12m possible combinations
     while (Object.keys(this.lobbies).includes(id)) {
       id = generateID();
@@ -73,6 +73,8 @@ class GameServer {
     const lobby = this.lobbies[id];
     lobby.game = new Game(lobby.players.length);
 
+    // TODO: send info back to the client differently
+    // figure out a better way to do it
     return {
       nPlayers: lobby.players.length,
       cardDesigns: lobby.players.map((pid) => {

@@ -9,6 +9,8 @@ spritesheets and loaded as textures into webgl in the future.
 // CONSTANTS
 // =============================================================
 // program constants
+const CARD_FONT = "Organo";
+const BOLD = true;
 const CARD_DIM_RATIO = [5, 7]; // width, height [9, 14] would also be acceptable (bridge cards)
 const SCREEN_FRAC = 1 / 6; // approximate fraction of the screen that one card should take up (on one axis)
 const FACE_SUITS = ["spades", "hearts", "diamonds", "clubs"]; // all allowed suits to drawCardFace function
@@ -86,7 +88,7 @@ function makeUnicodeStamp(char, size, color) {
   const c = new OffscreenCanvas(size, size);
   const ctx = c.getContext("2d");
   ctx.fillStyle = color;
-  ctx.font = `bold ${FACE_VALUES.includes(char) ? size * 0.8 : size}px Georgia`;
+  ctx.font = `${BOLD ? "bold" : ""} ${FACE_VALUES.includes(char) ? size * 0.8 : size}px ${CARD_FONT}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(char, size / 2, size / 2);

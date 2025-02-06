@@ -27,12 +27,12 @@ window.Client = Client;
 window.onload = async () => {
   await renderer.init();
 
-  State.game = new Game(4);
+  State.game = new Game(2);
   renderer.initGame([
     ["blue", "classic"],
     ["red", "classic"],
-    ["yellow", "classic"],
-    ["green", "classic"],
+    //["yellow", "classic"],
+    //["green", "classic"],
   ]);
   cardInteraction.init();
   main();

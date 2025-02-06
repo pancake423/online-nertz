@@ -1,10 +1,15 @@
 import { State } from "/scripts/state.js";
+import { EventHandler } from "/scripts/events.js";
 
 const UUID_LENGTH = 16;
 
 // "public" methods are created as object members
 // "private" ones are just non-exported class methods.
-const Client = Object.freeze({
+const Client = Object.seal({
+  UUID: generateRandomUUID(),
+  // serverID: undefined,
+  webSocket: undefined,
+
   getAvailableServerID: async () => {
     return await send("/id", "GET");
   },
@@ -16,15 +21,23 @@ const Client = Object.freeze({
     });
   },
   joinServer: async (id) => {
-    return await send("/join", "POST", {
+    res = await send("/join", "POST", {
       id: id,
       uuid: Client.UUID,
       username: State.username,
     });
-    // TODO: connect to web socket!
+    if (!res.accepted) return res;
+    // connect to web socket
     // as soon as we've successfully joined a server we need to start using real time communication.
+    Client.webSocket = new WebSocket("/");
+    Client.webSocket.onmessage = (e) =>
+      EventHandler.raiseEvent("message", JSON.parse(e.data));
   },
-  UUID: generateRandomUUID(),
+
+  sendData: (data) => {
+    // ensure that uuid is send with data
+    Client.webSocket.send();
+  },
 });
 
 async function send(path, method, body) {
