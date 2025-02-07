@@ -6,16 +6,16 @@
  for line count (excludes glMatrix code)
  git ls-files | grep -v gl-matrix |  xargs wc -l
 
- just broke 1500 lines!
 */
 
 import { Game } from "/shared/game-logic.js";
 import * as renderer from "/scripts/draw.js";
 import { EventHandler } from "/scripts/events.js";
 import * as cardInteraction from "/scripts/card-interaction.js";
-import { MoveTracker } from "/scripts/move-tracker.js"; // importing this registers its events
+import { MoveTracker } from "/scripts/move-tracker.js"; // importing these register events
 import { State } from "/scripts/state.js";
 import { Client } from "/scripts/client.js";
+import { UI } from "/scripts/ui.js";
 
 // some networking code eventually is going to handle the event when you request to make a move
 EventHandler.addEventListener("makemove", (e) => State.game.makeMove(e.move));
@@ -26,7 +26,11 @@ window.Client = Client;
 
 window.onload = async () => {
   await renderer.init();
+  cardInteraction.init();
+  renderer.drawBackground();
+};
 
+function start() {
   State.game = new Game(2);
   renderer.initGame([
     ["blue", "classic"],
@@ -34,9 +38,8 @@ window.onload = async () => {
     //["yellow", "classic"],
     //["green", "classic"],
   ]);
-  cardInteraction.init();
   main();
-};
+}
 
 // main game loop.
 function main() {

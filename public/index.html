@@ -5,7 +5,29 @@
 </head>
 <body>
     <div id="center">
-        <canvas id="bg" class="canvas"></canvas>
-        <canvas id="c" class="canvas"></canvas>
+        <canvas id="bg" class="fullsize-square"></canvas>
+        <canvas id="c" class="fullsize-square"></canvas>
+        <div id="ui" class="fullsize-square">
+            <div id="join-menu" class="menu">
+                <h1 id="title">ONLINE NERTZ</h1>
+                <p class="paragraph">♠ ♥ ♣ ♦</p>
+                <div class="group">
+                    <label for="lobby-code">Lobby Code:</label>
+                    <input
+                        class="input"
+                        id="lobby-code"
+                        type="text"
+                        minlength="5"
+                        maxlength="5"
+                        size="6"
+                        pattern="^[a-zA-Z]+$"
+                    />
+                </div>
+                <div class="group">
+                    <button class="button">JOIN</button>
+                    <button class="button">CREATE</button>
+                </div>
+            </div>
+        </div>
     </div>
 </body>

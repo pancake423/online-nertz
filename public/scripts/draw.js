@@ -233,4 +233,5 @@ export {
   setDragPos,
   endCardDrag,
   getTotalSize,
+  drawBackground,
 };

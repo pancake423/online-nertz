@@ -18,7 +18,6 @@ EventHandler.addEventListener("movepile", (e) => MoveTracker.updatePos(e));
 EventHandler.addEventListener("releasepile", (e) => MoveTracker.endMove(e));
 
 class MoveTracker {
-  // can optionally be defined in the constructor or later w/ init
   static pid = -1;
   static nCards = -1;
   static fromLoc = -1;

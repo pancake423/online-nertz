@@ -6,6 +6,7 @@ class State {
   static username = "pancake423";
   static nPlayers; // potentially for future use \/
   static cardPatterns;
+  static paused = true;
 }
 
 export { State };

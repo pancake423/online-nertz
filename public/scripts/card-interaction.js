@@ -100,6 +100,7 @@ function checkCollide(x, y, sx, sy, w, h) {
 }
 
 function onMouseDown(e) {
+  if (State.paused) return;
   const [x, y] = globalToGameCoords(e.clientX, e.clientY);
   const [loc, pile, nCards] = getSelectedCard(State.game, State.MY_PID, x, y);
   if (loc == PILES.INVALID || loc == PILES.FOUNDATION) return;
@@ -115,6 +116,7 @@ function onMouseDown(e) {
 }
 
 function onMouseUp(e) {
+  if (State.paused) return;
   if (!PILE_SELECTED) return;
   PILE_SELECTED = false;
   const [x, y] = globalToGameCoords(e.clientX, e.clientY);
@@ -129,12 +131,14 @@ function onMouseUp(e) {
 }
 
 function onMouseMove(e) {
+  if (State.paused) return;
   if (!PILE_SELECTED) return;
   const [x, y] = globalToGameCoords(e.clientX, e.clientY);
   EventHandler.raiseEvent("movepile", { pid: State.MY_PID, x: x, y: y });
 }
 
 function onBlur(e) {
+  if (State.paused) return;
   if (!PILE_SELECTED) return;
   PILE_SELECTED = false;
   EventHandler.raiseEvent("releasepile", {
