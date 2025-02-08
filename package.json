@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/pancake423/online-nertz#readme",
   "dependencies": {
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "express": "^4.21.2"
   }
 }
