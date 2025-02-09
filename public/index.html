@@ -8,24 +8,80 @@
         <canvas id="bg" class="fullsize-square"></canvas>
         <canvas id="c" class="fullsize-square"></canvas>
         <div id="ui" class="fullsize-square">
-            <div id="join-menu" class="menu">
-                <h1 id="title">ONLINE NERTZ</h1>
-                <p class="paragraph">♠ ♥ ♣ ♦</p>
-                <div class="group">
-                    <label for="lobby-code">Lobby Code:</label>
-                    <input
-                        class="input"
-                        id="lobby-code"
-                        type="text"
-                        minlength="5"
-                        maxlength="5"
-                        size="6"
-                        pattern="^[a-zA-Z]+$"
-                    />
+            <div id="join-menu" class="menu vert">
+                <div class="vert">
+                    <h1 id="title">ONLINE NERTZ</h1>
+                    <p class="subtitle">♠ ♥ ♣ ♦</p>
                 </div>
-                <div class="group">
-                    <button class="button">JOIN</button>
-                    <button class="button">CREATE</button>
+                <div class="vert fw">
+                    <div class="horiz fw">
+                        <label for="username">Username:</label>
+                        <input
+                            class="input"
+                            id="username"
+                            value="player"
+                            size="12"
+                            minlength="1"
+                            maxlength="16"
+                        />
+                    </div>
+                    <div class="horiz fw">
+                        <label for="pattern">Deck Pattern:</label>
+                        <select class="input" id="pattern">
+                            <option value="classic">Classic</option>
+                        </select>
+                    </div>
+                    <div class="horiz fw">
+                        <label for="color">Deck Color:</label>
+                        <div id="color" class="horiz">
+                            <button
+                                class="color-select active"
+                                style="background-color: red"
+                            ></button>
+                            <button
+                                class="color-select"
+                                style="background-color: blue"
+                            ></button>
+                            <button
+                                class="color-select"
+                                style="background-color: purple"
+                            ></button>
+                            <button
+                                class="color-select"
+                                style="background-color: black"
+                            ></button>
+                            <button
+                                class="color-select"
+                                style="background-color: orange"
+                            ></button>
+                            <button
+                                class="color-select"
+                                style="background-color: lightskyblue"
+                            ></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="horiz fw" style="align-items: flex-end">
+                    <div class="vert hw">
+                        <div class="horiz fw">
+                            <label for="lobby-code">Lobby Code:</label>
+                            <input
+                                class="input"
+                                id="lobby-code"
+                                type="text"
+                                minlength="5"
+                                maxlength="5"
+                                size="6"
+                                pattern="^[a-zA-Z]+$"
+                            />
+                        </div>
+                        <button class="button" id="join-button">JOIN</button>
+                    </div>
+                    <div class="horiz hw">
+                        <button class="button" id="create-button">
+                            CREATE
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

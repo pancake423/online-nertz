@@ -1,55 +1,90 @@
+/*
+rewrite:
+all information goes through the websocket
+call an event whenever a message is recieved
+have a type field that determines how the message is handled
+*/
+
 import { State } from "/scripts/state.js";
+import { UI } from "/scripts/ui.js";
 import { EventHandler } from "/scripts/events.js";
 
 const UUID_LENGTH = 16;
+
+EventHandler.addEventListener("message", onMessage);
+EventHandler.addEventListener("join-start", startJoin);
+EventHandler.addEventListener("create-start", startCreate);
 
 // "public" methods are created as object members
 // "private" ones are just non-exported class methods.
 const Client = Object.seal({
   UUID: generateRandomUUID(),
-  // serverID: undefined,
+  lobbyID: undefined,
   webSocket: undefined,
 
-  getAvailableServerID: async () => {
-    return await send("/id", "GET");
+  getAvailableServerID: () => {
+    Client.sendData({ type: "getid" });
   },
-  createServer: async (id) => {
-    return await send("/create", "POST", {
-      id: id,
-      uuid: Client.UUID,
-      username: State.username,
-    });
+  joinServer: (id) => {
+    Client.sendData({ type: "joinserver", id: id });
   },
-  joinServer: async (id) => {
-    res = await send("/join", "POST", {
-      id: id,
-      uuid: Client.UUID,
-      username: State.username,
-    });
-    if (!res.accepted) return res;
-    // connect to web socket
-    // as soon as we've successfully joined a server we need to start using real time communication.
+  connect: () => {
     Client.webSocket = new WebSocket("/");
+    Client.webSocket.onopen = () => {
+      Client.sendData({ type: "newuser" });
+    };
     Client.webSocket.onmessage = (e) =>
       EventHandler.raiseEvent("message", JSON.parse(e.data));
   },
 
   sendData: (data) => {
-    // ensure that uuid is send with data
-    Client.webSocket.send();
+    // ensure that uuid is sent with data
+    // and has a type so server can identify it
+    const d = Object.assign({}, data);
+    if (d.type == undefined)
+      throw new Error(`object ${d} does not define a type`);
+    d.uuid = Client.UUID;
+    Client.webSocket.send(JSON.stringify(data));
+  },
+
+  sendUserInfo: () => {
+    Client.sendData({
+      type: "userinfo",
+      username: UI.username,
+      cardColor: UI.deckColor,
+      cardDesign: UI.design,
+    });
   },
 });
 
-async function send(path, method, body) {
-  const options = {
-    method: method,
-    headers: { "Content-type": "application/json" },
-  };
-  if (method == "POST" && body != undefined) {
-    options.body = JSON.stringify(body);
+function onMessage(e) {
+  console.log(e);
+  switch (e.type) {
+    case "lobbyid":
+      //server sent us a lobby id. now we can join it
+      Client.joinServer(e.id);
+      break;
+    case "joined":
+      State.MY_PID = e.gameID;
+      Client.lobbyID = e.lobbyID;
+      EventHandler.raiseEvent("joinlobby", { id: e.lobbyID });
+      break;
+    case "joinfailed":
+      EventHandler.raiseEvent("joinfailed");
+      break;
+    default:
+      throw new Error(`invalid message '${e}' recieved from server`);
   }
-  const response = await fetch(path, options).then((res) => res.json());
-  return response;
+}
+
+function startJoin() {
+  Client.sendUserInfo();
+  Client.joinServer(UI.lobbyCode);
+}
+
+function startCreate() {
+  Client.sendUserInfo();
+  Client.getAvailableServerID();
 }
 
 function generateRandomUUID() {

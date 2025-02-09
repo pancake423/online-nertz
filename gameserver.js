@@ -42,27 +42,52 @@ class GameServer {
     return true;
   }
 
+  // creates a new client and ties their websocket and pid
+  static newClient(pid, ws) {
+    this.clients[pid] = {
+      ws: ws,
+      lobby: undefined, // which lobby the player is currently in
+      gameID: undefined, // player id within their assigned lobby,
+      username: undefined, // player's display name
+      cardDesign: undefined,
+      cardColor: undefined,
+    };
+  }
+  // updates a client's display info.
+  static setClientInfo(pid, info) {
+    const c = this.clients[pid];
+    const properties = ["username", "cardDesign", "cardColor"];
+    for (const p of properties) {
+      c[p] = info[p];
+    }
+  }
+
+  // removes a client from the pool when they disconnect.
+  static disconnect(ws) {
+    for (const uuid in this.clients) {
+      if (ws === this.clients[uuid].ws) {
+        delete this.clients[uuid];
+      }
+    }
+  }
+
   // adds a client to their game.
   // returns true if success, return false if failed.
-  static assignClient(pid, id, username) {
-    if (!Object.keys(this.lobbies).includes(id)) return false; // invalid game id
-    const cardColors = ["red", "blue", "yellow", "black"];
+  static assignClient(pid, id) {
+    if (!Object.keys(this.lobbies).includes(id)) return { ok: false }; // invalid game id
     const playerN = this.lobbies[id].players.length;
 
     // TODO: enable re-assignment to an existing server by finding their player number
     // instead of adding a new one.
-    if (playerN >= 3 || this.lobbies[id].players.includes(pid)) return false;
+    if (playerN >= 3 || this.lobbies[id].players.includes(pid))
+      return { ok: false };
 
-    this.clients[pid] = {
-      lobby: id, // which lobby the player is currently in
-      gameID: playerN, // player id within their assigned lobby,
-      username: username, // player's display name
-      cardDesign: "classic",
-      cardColor: cardColors[playerN],
-    };
+    const c = this.clients[pid];
+    c.lobby = id;
+    c.gameID = playerN;
     this.lobbies[id].players.push(pid);
 
-    return true;
+    return { ok: true, gameID: playerN };
   }
 
   // creates a new game.

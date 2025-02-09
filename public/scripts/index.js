@@ -28,6 +28,7 @@ window.onload = async () => {
   await renderer.init();
   cardInteraction.init();
   renderer.drawBackground();
+  Client.connect();
 };
 
 function start() {
