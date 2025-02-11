@@ -1,5 +1,14 @@
 import { EventHandler } from "/scripts/events.js";
 
+EventHandler.addEventListener("joinfailed", (e) => {
+  // todo: an actual interface for this at some point
+  alert("Failed to join server. Double check the code you entered.");
+});
+EventHandler.addEventListener("joinlobby", (e) => {
+  document.getElementById("lobby-code-display").value = e.id;
+  showPage("lobby-menu");
+});
+
 class UI {
   static lobbyCode = undefined;
   static deckColor = "red";
@@ -36,6 +45,13 @@ class UI {
       },
     );
   }
+}
+
+function showPage(pageID) {
+  Array(...document.getElementsByClassName("menu")).forEach((element) => {
+    element.classList.add("hidden");
+  });
+  document.getElementById(pageID).classList.remove("hidden");
 }
 
 function filterLobbyCode(code) {

@@ -119,6 +119,10 @@ h1 {
     transform: scale(1.2, 1.2);
 }
 
+.hidden {
+    display: none;
+}
+
 .fullsize-square {
     position: absolute;
     width: var(--canvas-size);

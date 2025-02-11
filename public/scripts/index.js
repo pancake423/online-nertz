@@ -3,8 +3,8 @@
  made by pancake423
 
  just for fun:
- for line count (excludes glMatrix code)
- git ls-files | grep -v gl-matrix |  xargs wc -l
+ for line count (excludes glMatrix code, .json files)
+ git ls-files | grep -v -e .json -e gl-matrix | xargs wc -l
 
 */
 
@@ -29,6 +29,8 @@ window.onload = async () => {
   cardInteraction.init();
   renderer.drawBackground();
   Client.connect();
+
+  main();
 };
 
 function start() {
@@ -44,6 +46,10 @@ function start() {
 
 // main game loop.
 function main() {
-  renderer.draw();
+  if (State.paused) {
+    renderer.drawBackground();
+  } else {
+    renderer.draw();
+  }
   requestAnimationFrame(main);
 }
