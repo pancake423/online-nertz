@@ -27,7 +27,7 @@ class MoveTracker {
 
   static startMove(e) {
     this.pid = e.pid;
-    this.nCards = e.nCards; // TODO: get this information from the click dynamically
+    this.nCards = e.nCards;
     this.fromLoc = e.loc;
     this.fromPile = e.pile;
     renderer.startCardDrag(...this.#getMove().slice(0, 4));

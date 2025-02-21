@@ -3,6 +3,10 @@ import { Game } from "./shared/game-logic.js";
 const GAME_ID_LENGTH = 5;
 const VALID_GAME_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+function send(ws, data) {
+  ws.send(JSON.stringify(data));
+}
+
 class GameServer {
   static clients = {}; // clientUUID -> {assignedGameID, assignedPID, cardDesign, cardColor}
   static lobbies = {}; // GameID -> Game object
@@ -34,7 +38,7 @@ class GameServer {
     if (Object.keys(this.lobbies).includes(id)) return false;
 
     this.lobbies[id] = {
-      players: [],
+      players: [undefined, undefined, undefined, undefined],
       host: undefined, // person with permission to delete players and start game
       game: undefined,
     };
@@ -55,41 +59,111 @@ class GameServer {
   }
   // updates a client's display info.
   static setClientInfo(pid, info) {
+    //make sure client actually exists so we don't crash the server
+    if (!(pid in this.clients)) return false;
     const c = this.clients[pid];
     const properties = ["username", "cardDesign", "cardColor"];
     for (const p of properties) {
       c[p] = info[p];
     }
+    return true;
   }
 
   // removes a client from the pool when they disconnect.
   static disconnect(ws) {
     for (const uuid in this.clients) {
       if (ws === this.clients[uuid].ws) {
+        // remove client from lobby as well
+        this.leaveLobby(uuid, this.clients[uuid].lobby);
         delete this.clients[uuid];
       }
     }
   }
 
+  static updatePlayerList(id) {
+    let players = []; // {username, gameID, deck color, deck pattern}
+
+    const lobby = this.lobbies[id];
+    for (const pid of lobby.players) {
+      if (pid == undefined) continue;
+      const player = this.clients[pid];
+      players.push({
+        username: player.username,
+        gameID: player.gameID,
+        cardDesign: player.cardDesign,
+        cardColor: player.cardColor,
+        host: pid == lobby.host,
+      });
+    }
+    for (const pid of lobby.players) {
+      if (pid == undefined) continue;
+      send(this.clients[pid].ws, { type: "playerlist", data: players });
+    }
+  }
+
+  // removes a client from a lobby when they leave or disconnect
+  static leaveLobby(pid, id) {
+    const lobby = this.lobbies[id];
+
+    // remove player from lobby
+    for (let i = 0; i < lobby.players.length; i++) {
+      if (lobby.players[i] == pid) {
+        lobby.players[i] = undefined;
+      }
+    }
+
+    // check if player is host
+    if (lobby.host == pid) {
+      lobby.host = undefined;
+      // look for other players in lobby
+      let nextPlayer = undefined;
+      for (const p of lobby.players) {
+        if (p != undefined) {
+          nextPlayer = p;
+          break;
+        }
+      }
+      if (nextPlayer == undefined) {
+        // lobby is empty and can be deleted
+        delete this.lobbies[id];
+        return; // stops the function from trying to update the player list of a now empty server.
+      } else {
+        //upgrade someone else to host
+        lobby.host = nextPlayer;
+        send(this.clients[lobby.host].ws, { type: "permissions", host: true });
+      }
+    }
+
+    // send a message to other players updating the player list
+    this.updatePlayerList(id);
+  }
+
   // adds a client to their game.
   // returns true if success, return false if failed.
   static assignClient(pid, id) {
-    if (!Object.keys(this.lobbies).includes(id)) return { ok: false }; // invalid game id
-    const playerN = this.lobbies[id].players.length;
+    if (!Object.keys(this.lobbies).includes(id))
+      return { ok: false, reason: "invalid" }; // invalid game id
+    let playerN = 0;
+    const players = this.lobbies[id].players;
+    while (playerN <= 3 && players[playerN] != undefined) playerN++;
 
-    // TODO: enable re-assignment to an existing server by finding their player number
-    // instead of adding a new one.
-    if (playerN >= 3 || this.lobbies[id].players.includes(pid))
-      return { ok: false };
+    if (playerN > 3 || players.includes(pid))
+      return { ok: false, reason: "full" };
 
     const c = this.clients[pid];
     c.lobby = id;
     c.gameID = playerN;
-    this.lobbies[id].players.push(pid);
+    players[playerN] = pid;
 
-    return { ok: true, gameID: playerN };
+    let host = false;
+    if (this.lobbies[id].host == undefined) {
+      host = true;
+      this.lobbies[id].host = pid;
+    }
+    return { ok: true, gameID: playerN, host: host };
   }
 
+  // TODO: this function needs a full rewrite
   // creates a new game.
   // returns a JSON object containing all of the useful data that
   // we want to send back to the client(s).

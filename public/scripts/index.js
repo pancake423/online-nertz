@@ -23,12 +23,14 @@ EventHandler.addEventListener("makemove", (e) => State.game.makeMove(e.move));
 // put modules into global namespace (for debug/testing)
 window.State = State;
 window.Client = Client;
+window.UI = UI;
 
 window.onload = async () => {
   await renderer.init();
   cardInteraction.init();
   renderer.drawBackground();
   Client.connect();
+  UI.getPrefilledValues();
 
   main();
 };

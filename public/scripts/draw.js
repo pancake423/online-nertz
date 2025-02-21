@@ -72,7 +72,8 @@ function getTotalSize(nCards, xAxis = false) {
   return nCards * (xAxis ? CARD_W / CARD_H : 1) + (nCards - 1) * STACK_OFFSET;
 }
 
-// TODO: are these canvas space pixels or actual screen space pixels?
+// are these canvas space pixels or actual screen space pixels?
+// didnt end up needing
 function pixelToScreen(x, y) {
   return [0, 0];
 }

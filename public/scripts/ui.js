@@ -1,12 +1,16 @@
 import { EventHandler } from "/scripts/events.js";
+import { State } from "/scripts/state.js";
 
 EventHandler.addEventListener("joinfailed", (e) => {
   // todo: an actual interface for this at some point
-  alert("Failed to join server. Double check the code you entered.");
+  alert("Failed to join server. Causes: invalid code, lobby is full.");
 });
 EventHandler.addEventListener("joinlobby", (e) => {
   document.getElementById("lobby-code-display").value = e.id;
   showPage("lobby-menu");
+});
+EventHandler.addEventListener("updateplayerlist", () => {
+  updatePlayerList(State.playerInfo);
 });
 
 class UI {
@@ -14,12 +18,16 @@ class UI {
   static deckColor = "red";
   static design = "classic";
   static username = undefined;
+  static lobbyCodeField;
+  static usernameField;
   static {
+    this.lobbyCodeField = document.getElementById("lobby-code");
+    this.usernameField = document.getElementById("username");
     // set up a bunch of button click actions and events
-    document.getElementById("lobby-code").oninput = (e) => {
+    this.lobbyCodeField.oninput = (e) => {
       UI.lobbyCode = e.target.value = filterLobbyCode(e.target.value);
     };
-    document.getElementById("username").oninput = (e) => {
+    this.usernameField.oninput = (e) => {
       UI.username = e.target.value;
     };
     document.getElementById("pattern").oninput = (e) => {
@@ -45,6 +53,31 @@ class UI {
       },
     );
   }
+  static getPrefilledValues() {
+    this.username = this.usernameField.value;
+    this.lobbyCode = this.lobbyCodeField.value;
+  }
+}
+
+// generates the UI for one player that is currently in the lobby.
+function generatePlayerUI(info) {
+  const out = document.createElement("div");
+  out.classList.add(
+    "horiz",
+    "hw",
+    info.gameID == State.MY_PID ? "deco-dark" : "deco",
+  );
+  const pname = document.createElement("p");
+  pname.innerText = info.username + (info.host ? "★" : "");
+
+  out.appendChild(pname);
+
+  return out;
+}
+
+function updatePlayerList(data) {
+  const out = data.map((info) => generatePlayerUI(info));
+  document.getElementById("player-list").replaceChildren(...out);
 }
 
 function showPage(pageID) {

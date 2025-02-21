@@ -1,7 +1,3 @@
-// sudo ufw disable to turn of the firewall temporarily
-// makes it easier to allow local connections for testing
-// TODO: port forwarding should let me set up a public webserver
-
 import { GameServer } from "./gameserver.js";
 import express from "express";
 import WebSocket, { WebSocketServer } from "ws";
@@ -27,7 +23,7 @@ wss.on("connection", (ws) => {
 const server = app.listen(PORT, async () => {
   console.log(`machine address: localhost:${PORT}`);
   console.log(`local address: http://${getIPAddress()}:${PORT}`);
-  console.log(`public address: http://${await publicIpv4()}:${PORT}`);
+  console.log(`public address: http://${await publicIpv4()}`);
 });
 
 server.on("upgrade", (request, socket, head) => {
@@ -81,10 +77,17 @@ function handleMessage(wss, ws, m) {
     case "joinserver":
       const res = GameServer.assignClient(message.uuid, message.id);
       if (res.ok) {
-        send(ws, { type: "joined", gameID: res.gameID, lobbyID: message.id });
+        send(ws, {
+          type: "joined",
+          gameID: res.gameID,
+          lobbyID: message.id,
+          host: res.host,
+        });
+        GameServer.updatePlayerList(message.id);
       } else {
         send(ws, { type: "joinfailed" });
       }
+      console.log(GameServer.lobbies);
       break;
     default:
       console.log(`invalid message: ${message}`);

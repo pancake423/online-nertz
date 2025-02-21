@@ -44,7 +44,7 @@ const Client = Object.seal({
     if (d.type == undefined)
       throw new Error(`object ${d} does not define a type`);
     d.uuid = Client.UUID;
-    Client.webSocket.send(JSON.stringify(data));
+    Client.webSocket.send(JSON.stringify(d)); // oopsies
   },
 
   sendUserInfo: () => {
@@ -67,13 +67,23 @@ function onMessage(e) {
     case "joined":
       State.MY_PID = e.gameID;
       Client.lobbyID = e.lobbyID;
+      State.host = e.host;
       EventHandler.raiseEvent("joinlobby", { id: e.lobbyID });
       break;
     case "joinfailed":
       EventHandler.raiseEvent("joinfailed");
       break;
+    case "permissions":
+      State.host = e.host;
+      break;
+    case "playerlist":
+      State.playerInfo = e.data;
+      EventHandler.raiseEvent("updateplayerlist");
+      break;
     default:
-      throw new Error(`invalid message '${e}' recieved from server`);
+      throw new Error(
+        `invalid message '${JSON.stringify(e)}' recieved from server`,
+      );
   }
 }
 

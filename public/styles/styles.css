@@ -36,6 +36,16 @@ h1 {
     justify-content: center;
     position: absolute;
 }
+.deco,
+.deco-dark {
+    background-color: #abe06b;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+.deco-dark {
+    background-color: #719a3f;
+}
+
 .horiz,
 .vert {
     display: flex;
