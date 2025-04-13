@@ -89,6 +89,14 @@ class Game {
       this.foundations.push([]);
     }
   }
+
+  clone() {
+    const out = new Game(0);
+    out.players = structuredClone(this.players);
+    out.foundations = structuredClone(this.foundations);
+    return out;
+  }
+
   checkValidMove(move) {
     const [pid, nCards, fromLoc, fromPile, toLoc, toPile] = move;
     // first check for valid PID
@@ -127,6 +135,8 @@ class Game {
       return true;
     // otherwise, you can't put a card into stock or waste.
     if (toLoc == PILES.STOCK || toLoc == PILES.WASTE) return false;
+    // you also can't move a card from stock to anywhere but waste
+    if (fromLoc == PILES.STOCK) return false;
     /*
     move type: any other. the bottom card of the pile we are moving must "match"
     with the top card of the destination pile. if the destination pile is a work pile, that means alternating color and descending.
@@ -135,7 +145,8 @@ class Game {
     const destPile = this.getPileContents(pid, toLoc, toPile);
     const startPile = this.getPileContents(pid, fromLoc, fromPile);
     // can't move cards from an empty pile :)
-    if (startPile.length == 0) return false;
+    // cant move more cards than are in a pile
+    if (startPile.length == 0 || startPile.length < nCards) return false;
     const firstStartCard = startPile[startPile.length - nCards];
     // you can always move cards to an empty work pile. you can only move aces to empty foundation piles.
     if (destPile.length == 0) {
@@ -222,6 +233,26 @@ class Game {
     const moveCards = from.splice(from.length - nToMove, nToMove);
     if (reverse) moveCards.reverse();
     to.push(...moveCards);
+  }
+
+  // check if the game has ended (one player has cleared all their cards)
+  checkEnd() {
+    return this.players.map((p) => p.nertzPile.length).includes(0);
+  }
+
+  // gets the current score for each player
+  getScores() {
+    const scores = this.players.map((_) => 0);
+    for (const pile of this.foundations) {
+      for (const card of pile) {
+        scores[card[2]]++;
+      }
+    }
+    for (let i = 0; i < this.players.length; i++) {
+      scores[i] -= this.players[i].nertzPile.length;
+    }
+
+    return scores;
   }
 }
 

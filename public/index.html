@@ -85,7 +85,7 @@
                 </div>
             </div>
             <div id="lobby-menu" class="menu vert hidden">
-                <div class="vert fw">
+                <div class="vert fw" style="height: 100%">
                     <h1 id="title">ONLINE NERTZ</h1>
                     <div class="horiz">
                         <label for="lobby-code-display">Lobby Code:</label>
@@ -98,6 +98,18 @@
                         />
                     </div>
                     <div class="vert fw" id="player-list"></div>
+                    <div
+                        class="horiz fw"
+                        style="height: 100%; align-items: flex-end"
+                        id="lobby-buttons"
+                    >
+                        <button class="button-inactive" id="match-start">
+                            start
+                        </button>
+                        <button class="button-inactive" id="add-bot">
+                            add bot
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

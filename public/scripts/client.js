@@ -14,6 +14,8 @@ const UUID_LENGTH = 16;
 EventHandler.addEventListener("message", onMessage);
 EventHandler.addEventListener("join-start", startJoin);
 EventHandler.addEventListener("create-start", startCreate);
+EventHandler.addEventListener("match-start", startMatch);
+EventHandler.addEventListener("add-bot", addBot);
 
 // "public" methods are created as object members
 // "private" ones are just non-exported class methods.
@@ -80,6 +82,10 @@ function onMessage(e) {
       State.playerInfo = e.data;
       EventHandler.raiseEvent("updateplayerlist");
       break;
+    case "startfailed":
+      break;
+    case "start":
+      break;
     default:
       throw new Error(
         `invalid message '${JSON.stringify(e)}' recieved from server`,
@@ -105,6 +111,16 @@ function generateRandomUUID() {
   return Array.from(Array(UUID_LENGTH))
     .map(() => chars.charAt(Math.floor(Math.random() * chars.length)))
     .join("");
+}
+
+function startMatch() {
+  if (!State.host) return;
+  Client.sendData({ type: "matchstart", lobbyID: Client.lobbyID });
+}
+
+function addBot() {
+  if (!State.host) return;
+  Client.sendData({ type: "addbot" });
 }
 
 export { Client };

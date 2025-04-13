@@ -102,6 +102,7 @@ class GameServer {
   }
 
   // removes a client from a lobby when they leave or disconnect
+  // TODO: might be bugged (haven't figured out how to replicate the crash yet)
   static leaveLobby(pid, id) {
     const lobby = this.lobbies[id];
 
@@ -163,34 +164,26 @@ class GameServer {
     return { ok: true, gameID: playerN, host: host };
   }
 
-  // TODO: this function needs a full rewrite
-  // creates a new game.
-  // returns a JSON object containing all of the useful data that
-  // we want to send back to the client(s).
-  static startGame(id) {
-    if (!Object.keys(this.lobbies).includes(id)) return;
+  static startGame(id, pid) {
+    if (!Object.keys(this.lobbies).includes(id))
+      return { ok: false, reason: "invalid" }; // invalid game id
+    if (this.lobbies[id].host != pid) {
+      return { ok: false, reason: "nothost" }; // only host can start game
+    }
     const lobby = this.lobbies[id];
-    lobby.game = new Game(lobby.players.length);
+    const playerCount = lobby.players.filter((n) => n != undefined).length;
+    console.log(playerCount);
+    if (playerCount < 2) {
+      return { ok: false, reason: "notenoughplayers" }; // need at least 2 players
+    }
 
-    // TODO: send info back to the client differently
-    // figure out a better way to do it
-    return {
-      nPlayers: lobby.players.length,
-      cardDesigns: lobby.players.map((pid) => {
-        const clientInfo = this.clients[pid];
-        return {
-          cardDesign: clientInfo.cardDesign,
-          cardColor: clientInfo.cardColor,
-        };
-      }),
-      playerHands: lobby.game.players.map((hand) => {
-        return {
-          workPiles: hand.workPiles,
-          nertzPile: hand.nertzPile,
-          stock: hand.stock,
-        };
-      }),
-    };
+    lobby.game = new Game(playerCount);
+    // send data to everyone in the lobby
+    for (const uuid of lobby.players) {
+      if (uuid == undefined) continue;
+      send(this.clients[uuid].ws, { type: "start", data: lobby.game.players });
+    }
+    return { ok: true };
   }
 }
 

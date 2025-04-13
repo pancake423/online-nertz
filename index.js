@@ -1,6 +1,6 @@
 import { GameServer } from "./gameserver.js";
 import express from "express";
-import WebSocket, { WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 
 import { publicIpv4 } from "public-ip";
 import os from "node:os";
@@ -57,6 +57,7 @@ function send(ws, data) {
 
 function handleMessage(wss, ws, m) {
   const message = JSON.parse(m);
+  let res;
   console.log(message);
   switch (message.type) {
     case "newuser":
@@ -75,7 +76,7 @@ function handleMessage(wss, ws, m) {
     case "makeserver":
       break;
     case "joinserver":
-      const res = GameServer.assignClient(message.uuid, message.id);
+      res = GameServer.assignClient(message.uuid, message.id);
       if (res.ok) {
         send(ws, {
           type: "joined",
@@ -88,6 +89,16 @@ function handleMessage(wss, ws, m) {
         send(ws, { type: "joinfailed" });
       }
       console.log(GameServer.lobbies);
+      break;
+    case "matchstart":
+      // only allowed for host
+      res = GameServer.startGame(message.lobbyID, message.uuid);
+      if (!res.ok) {
+        send(ws, { type: "startfailed", reason: res.reason });
+      }
+      break;
+    case "addbot":
+      console.log("addbot not implemented");
       break;
     default:
       console.log(`invalid message: ${message}`);

@@ -37,8 +37,8 @@ const FACE_VALUES = [
 ]; // all allowed values to drawCardFace function
 const BACK_DESIGNS = ["classic"]; // "circles", "waves", "zig-zags"
 const CARD_ROUNDING_SIZE = 1 / 8; // controls how large the rounding of the corners of the cards is.
-const CARD_STAMP_SIZE = 1 / 4; // size of the numbers and central symbols on each card.
-const CARD_SMALL_STAMP_SIZE = 1 / 6; // size of the small suit symbols under the card value.
+const CARD_STAMP_SIZE = 1 / 3; // size of the numbers and central symbols on each card.
+const CARD_SMALL_STAMP_SIZE = 1 / 4; // size of the small suit symbols under the card value.
 const CARD_PADDING_Y = 1 / 32; // spacing between symbols on the face of the card.
 const CARD_PADDING_X = 0;
 const CARD_LINE_THICKNESS = 1 / 32;

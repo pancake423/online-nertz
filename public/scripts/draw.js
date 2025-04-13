@@ -2,6 +2,7 @@ import * as glr from "/scripts/gl-draw.js";
 import * as ss from "/scripts/spritesheet.js";
 import { CARD_W, CARD_H } from "/scripts/card-renderer.js";
 import { State } from "/scripts/state.js";
+import { PILES } from "/shared/game-logic.js";
 
 // scaling factor on canvases for performance reasons.
 // higher number = more scaling = lower res
@@ -185,12 +186,71 @@ function getPos(p) {
     case "bottom":
       return [[SIZE / 2, SIZE - PLAYER_SIZE + 0.5], [1, 0], 0];
     case "top":
-      return [[SIZE / 2, PLAYER_SIZE - 0.5], [-1, 0], 0];
+      return [[SIZE / 2, PLAYER_SIZE - 0.5], [-1, 0], 180];
     case "left":
       return [[PLAYER_SIZE - 0.5, SIZE / 2], [0, -1], 90];
     case "right":
-      return [[SIZE - PLAYER_SIZE + 0.5, SIZE / 2], [0, 1], 90];
+      return [[SIZE - PLAYER_SIZE + 0.5, SIZE / 2], [0, 1], -90];
   }
+}
+
+function getPileCoords(pid, loc, pile) {
+  const lookup = {};
+
+  const nPlayers = State.game.players.length;
+  const cardWidth = CARD_W / CARD_H;
+
+  let x = PLAYER_SIZE;
+  let y = PLAYER_SIZE;
+  let maxW = CENTER_SIZE;
+  let maxH = CENTER_SIZE;
+
+  let w = getTotalSize(4, true);
+  let h = getTotalSize(nPlayers);
+
+  x += (maxW - w + cardWidth) / 2;
+  y += (maxH - h + 1) / 2;
+
+  for (let i = 0; i < State.game.foundations.length; i++) {
+    const dx = (i % 4) * (cardWidth + STACK_OFFSET);
+    const dy = Math.floor(i / 4) * (1 + STACK_OFFSET);
+    lookup[JSON.stringify([0, PILES.FOUNDATION, i])] = [x + dx, y + dy];
+  }
+
+  const positions = ["left", "right", "top", "bottom"];
+  playerHandCoords(
+    lookup,
+    State.MY_PID,
+    State.game.players[State.MY_PID],
+    positions.pop(),
+  );
+  for (let i = 0; i < nPlayers; i++) {
+    if (i == State.MY_PID) continue;
+    playerHandCoords(lookup, i, State.game.players[i], positions.pop());
+  }
+
+  return lookup[JSON.stringify([loc == PILES.FOUNDATION ? 0 : pid, loc, pile])];
+}
+
+function playerHandCoords(lookup, pid, hand, pos) {
+  let [[x, y], [dx, dy], theta] = getPos(pos);
+  const cardWidth = CARD_W / CARD_H;
+  const nPiles = hand.workPiles.length;
+  x -= ((getTotalSize(nPiles + 1, true) - cardWidth) * dx) / 2;
+  y -= ((getTotalSize(nPiles + 1, true) - cardWidth) * dy) / 2;
+
+  for (let i = 0; i < nPiles; i++) {
+    lookup[JSON.stringify([pid, PILES.WORK, i])] = [x, y];
+    x += (cardWidth + STACK_OFFSET) * dx;
+    y += (cardWidth + STACK_OFFSET) * dy;
+  }
+  lookup[JSON.stringify([pid, PILES.NERTZ, 0])] = [x, y];
+  x += (1 + STACK_OFFSET) * dy;
+  y += (1 + STACK_OFFSET) * dx;
+  lookup[JSON.stringify([pid, PILES.STOCK, 0])] = [x, y];
+  x += (cardWidth + STACK_OFFSET) * dx;
+  y += (cardWidth + STACK_OFFSET) * dy;
+  lookup[JSON.stringify([pid, PILES.WASTE, 0])] = [x, y];
 }
 
 function toDegrees(rad) {
@@ -205,6 +265,25 @@ function drawBackground() {
 
   ctx.fillStyle = BG_COLOR;
   ctx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  ctx.fillStyle = BG_ACCENT_COLOR;
+
+  const transform = (coord) => (coord * bgCanvas.width) / SIZE;
+  if (State.game != undefined) {
+    for (let i = 0; i < State.game.players.length; i++) {
+      let [x, y] = getPileCoords(i, PILES.NERTZ, 0);
+      ctx.roundRect(
+        ...[x - 0.6, y - 0.6, 1.2, 1.2, 0.1].map((n) => transform(n)),
+      );
+    }
+    for (let i = 0; i < State.game.foundations.length; i++) {
+      let [x, y] = getPileCoords(0, PILES.FOUNDATION, i);
+      ctx.roundRect(
+        ...[x - 0.7, y - 0.7, 1.4, 1.4, 0.1].map((n) => transform(n)),
+      );
+    }
+    ctx.fill();
+  }
 }
 
 function getLayout() {
@@ -219,6 +298,10 @@ function getLayout() {
   };
 }
 
+// TODO: how tf are we implementing animations? (as simply as possible is the answer lol)
+function startAnimation(move) {} // raises event when animation finishes?
+
+// these are for the cards we are moving with the mouse
 function startCardDrag(pid, nCards, fromLoc, fromPile) {}
 
 function setDragPos(x, y) {}
@@ -235,4 +318,5 @@ export {
   endCardDrag,
   getTotalSize,
   drawBackground,
+  getPileCoords,
 };

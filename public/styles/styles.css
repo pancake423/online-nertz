@@ -77,7 +77,8 @@ h1 {
     box-sizing: border-box;
 }
 
-.button {
+.button,
+.button-inactive {
     border-radius: 0.5rem;
     padding: 0.5rem;
     outline: none;
@@ -137,4 +138,9 @@ h1 {
     position: absolute;
     width: var(--canvas-size);
     height: var(--canvas-size);
+}
+
+.button-inactive {
+    user-select: none;
+    cursor: not-allowed;
 }

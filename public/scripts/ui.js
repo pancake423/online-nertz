@@ -11,6 +11,11 @@ EventHandler.addEventListener("joinlobby", (e) => {
 });
 EventHandler.addEventListener("updateplayerlist", () => {
   updatePlayerList(State.playerInfo);
+  if (State.host) {
+    unlockLobbyButtons();
+  } else {
+    lockLobbyButtons();
+  }
 });
 
 class UI {
@@ -38,6 +43,12 @@ class UI {
     };
     document.getElementById("create-button").onclick = (e) => {
       EventHandler.raiseEvent("create-start");
+    };
+    document.getElementById("match-start").onclick = (e) => {
+      EventHandler.raiseEvent("match-start", { code: UI.lobbyCode });
+    };
+    document.getElementById("add-bot").onclick = (e) => {
+      EventHandler.raiseEvent("add-bot");
     };
     Array(...document.getElementsByClassName("color-select")).forEach(
       (element) => {
@@ -97,6 +108,16 @@ function filterLobbyCode(code) {
     }
   }
   return out;
+}
+
+function unlockLobbyButtons() {
+  document.getElementById("match-start").className = "button";
+  document.getElementById("add-bot").className = "button";
+}
+
+function lockLobbyButtons() {
+  document.getElementById("match-start").className = "button-inactive";
+  document.getElementById("add-bot").className = "button-inactive";
 }
 
 export { UI };
