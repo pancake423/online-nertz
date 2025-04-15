@@ -1,8 +1,0 @@
-get a random game from the given generation (to plug into the replay tool) plus some filters
-
-chart number of games w/ a winner over time ( a good proxy for skill)
-chart points per game over time (also a good proxy of skill)
-TODO: more info in the match object (like points per player)
-
-chart average game length (in moves)- lower game length could mean better play
-compare winrates of agents across generations, and across models (simple versus complex, etc.)

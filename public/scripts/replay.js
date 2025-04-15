@@ -13,22 +13,23 @@ window.onload = async () => {
 };
 
 function start() {
-  State.paused = false;
-  State.game = new Game(4);
-  renderer.initGame([
-    ["blue", "classic"],
-    ["red", "classic"],
-    ["yellow", "classic"],
-    ["green", "classic"],
-  ]);
-  console.log(renderer.getPileCoords(0, 0, 0));
   main();
 }
 
 function loadGame(dataString) {
   const data = JSON.parse(dataString);
+  State.paused = false;
+  State.game = new Game(data.deal.length);
   State.game.players = data.deal;
   moveList = data.moves;
+  renderer.initGame(
+    [
+      ["blue", "classic"],
+      ["red", "classic"],
+      ["yellow", "classic"],
+      ["green", "classic"],
+    ].splice(data.deal.length, Infinity),
+  );
 }
 window.loadGame = loadGame;
 
@@ -37,6 +38,8 @@ function nextMove() {
   moveIdx++;
 }
 window.nextMove = nextMove;
+window.moveList = moveList;
+window.State = State;
 
 // main game loop.
 function main() {

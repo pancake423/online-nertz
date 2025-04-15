@@ -5,7 +5,8 @@ const MAX_TURNS_WO_PROGRESS = 50;
 // simulate a match between the given list of agents
 // returns 0 if the match ended by no progress
 // returns 1 if the match ended by nertz
-function simMatch(agents) {
+function simMatch(agents, nomoves = false) {
+  const t_start = Date.now();
   const n = agents.length;
   const game = new Game(agents.length);
   let turn = 0;
@@ -15,6 +16,7 @@ function simMatch(agents) {
     deal: structuredClone(game.players),
     moves: [],
     hasWinner: 0,
+    time_ms: 0,
   };
 
   let run = true;
@@ -36,9 +38,17 @@ function simMatch(agents) {
     if (turns_without_progress >= MAX_TURNS_WO_PROGRESS * n) break;
   }
   const scores = game.getScores();
+  gameLog.scores = scores;
   for (let i = 0; i < n; i++) {
     agents[i].score += scores[i];
   }
+  gameLog.moveCount = gameLog.moves.length;
+  if (nomoves) {
+    delete gameLog.moves;
+    delete gameLog.deal;
+  }
+  const t_stop = Date.now();
+  gameLog.time_ms = t_stop - t_start;
   return gameLog;
 }
 

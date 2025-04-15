@@ -4,28 +4,29 @@ import { simMatch } from "./sim-match.js";
 
 class Sim {
   // hyperparameters
-  static N = 32; // number of individuals
-  static GENERATIONS = 5; // number of generations to simulate
+  static N = 64; // number of individuals
+  static GENERATIONS = 15; // number of generations to simulate
 
-  static PLAYERS_PER_MATCH = 4;
-  static CARDS_FLIPPED = 3;
+  static PLAYERS_PER_MATCH = 2;
   static N_ROUNDS = 10; // number of rounds played within each generation
 
   static MIN_WEIGHT = -10;
   static MAX_WEIGHT = 10;
 
-  static NUM_RULES = 3; // number of rules to use. should be <= Agent.NUM_RULES
+  static NUM_RULES = 6; // number of rules to use. should be <= Agent.NUM_RULES
 
   static REWARD_FOR_WIN = 10; // amount of extra reward for winning a match
 
   static FRAC_LIVE = 0.4; // fraction of individuals that survive after each generation.
 
-  static MUTATION_RATE = 0.25; // odds of each parameter for each individual mutating every generation
+  static MUTATION_RATE = 0.2; // odds of each parameter for each individual mutating every generation
   static MUTATION_AMT = 3; // maximum delta in weight for each mutation
 
   static CROSSOVER_RATE = 0.1; // odds of each individual having crossover every generation
   static MIN_LEN_CROSS = 1; // length of crossover sequence
   static MAX_LEN_CROSS = 4;
+
+  static NO_MOVE_LOGS = true;
 
   // runs the simulation and returns the full dump of results
   static run() {
@@ -37,23 +38,29 @@ class Sim {
         matches: [],
       };
       let total_wins = 0;
-      console.log(`generation ${i}`);
+      if (i != 0) {
+        process.stdout.write("\u001b[2F\u001b[0J");
+      }
+      console.log(`generation ${i + 1}/${this.GENERATIONS}`);
       // simulate many rounds of matches
       for (let j = 0; j < this.N_ROUNDS; j++) {
-        console.log(`round ${j}`);
+        if (j != 0) {
+          process.stdout.write("\u001b[1F\u001b[2K");
+        }
+        console.log(`round ${j + 1}/${this.N_ROUNDS}`);
         const groups = this.groupAgents(agents, this.PLAYERS_PER_MATCH);
         for (const group of groups) {
-          const log = simMatch(group);
+          const log = simMatch(group, this.NO_MOVE_LOGS);
           generationData.matches.push(log);
           total_wins += log.hasWinner;
         }
       }
-      console.log(
+      /*console.log(
         "wins:",
         total_wins,
         "/",
         (this.N_ROUNDS * this.N) / this.PLAYERS_PER_MATCH,
-      );
+      );*/
       // sort by performance
       const agentScore = (a) => a.score + a.wins * this.REWARD_FOR_WIN;
       agents.sort((a, b) => agentScore(b) - agentScore(a));

@@ -1,7 +1,6 @@
 // modifiable rules. TODO: how to modify them dynamically?
 let WORK_PILES = 4;
 let NERTZ_PILE_SIZE = 13;
-let STOCK_FLIP_AMT = 3; // number of cards to flip from stock to waste in each step.
 const VALUES = [
   "A",
   "2",
@@ -88,6 +87,8 @@ class Game {
     for (let i = 0; i < nPlayers * 4; i++) {
       this.foundations.push([]);
     }
+    this.STOCK_FLIP_AMT = nPlayers == 2 ? 1 : 3; // number of cards to flip from stock to waste in each step.
+    // one for 2-player, 3 otherwise
   }
 
   clone() {
@@ -225,7 +226,7 @@ class Game {
     // move stock to waste
     if (fromLoc == PILES.STOCK && toLoc == PILES.WASTE) {
       // move STOCK_FLIP_AMT (unless there are less cards than that available)
-      nToMove = Math.min(from.length, STOCK_FLIP_AMT);
+      nToMove = Math.min(from.length, this.STOCK_FLIP_AMT);
       reverse = true;
     }
 
