@@ -18,7 +18,27 @@ import { Client } from "/scripts/client.js";
 import { UI } from "/scripts/ui.js";
 
 // some networking code eventually is going to handle the event when you request to make a move
+EventHandler.addEventListener("sendmove", (e) =>
+  Client.sendData({ type: "move", move: e.move }),
+);
 EventHandler.addEventListener("makemove", (e) => State.game.makeMove(e.move));
+
+EventHandler.addEventListener("start", (e) => {
+  State.game = new Game(e.data.length);
+  State.game.players = e.data;
+  renderer.initGame(State.playerInfo.map((i) => [i.cardColor, i.cardDesign]));
+  cardInteraction.init();
+  State.paused = false;
+});
+
+EventHandler.addEventListener("gameover", (e) => {
+  alert(
+    "Game over! Final scores:\n" +
+      State.playerInfo
+        .map((p) => `${p.username}: ${e.data[p.gameID]}\n`)
+        .join(""),
+  );
+});
 
 // put modules into global namespace (for debug/testing)
 window.State = State;
@@ -27,8 +47,6 @@ window.UI = UI;
 
 window.onload = async () => {
   await renderer.init();
-  cardInteraction.init();
-  renderer.drawBackground();
   Client.connect();
   UI.getPrefilledValues();
 
@@ -43,7 +61,6 @@ function start() {
     //["yellow", "classic"],
     //["green", "classic"],
   ]);
-  main();
 }
 
 // main game loop.

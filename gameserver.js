@@ -1,9 +1,16 @@
 import { Game } from "./shared/game-logic.js";
+import { Agent } from "./learning_agent/agent.js";
 
 const GAME_ID_LENGTH = 5;
 const VALID_GAME_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
+const AGENT = new Agent([
+  8.480684413808783, 5.262477317044133, 8.16368118052839, 0.1830865010763139,
+  -5.650195276148366, -0.7653893311618932, -1.5208900916403423,
+]);
+
 function send(ws, data) {
+  if (!ws) return;
   ws.send(JSON.stringify(data));
 }
 
@@ -41,6 +48,7 @@ class GameServer {
       players: [undefined, undefined, undefined, undefined],
       host: undefined, // person with permission to delete players and start game
       game: undefined,
+      running: false,
     };
 
     return true;
@@ -172,18 +180,66 @@ class GameServer {
     }
     const lobby = this.lobbies[id];
     const playerCount = lobby.players.filter((n) => n != undefined).length;
-    console.log(playerCount);
     if (playerCount < 2) {
       return { ok: false, reason: "notenoughplayers" }; // need at least 2 players
     }
 
-    lobby.game = new Game(playerCount);
+    this.lobbies[id].game = new Game(playerCount);
+    lobby.running = true;
     // send data to everyone in the lobby
     for (const uuid of lobby.players) {
       if (uuid == undefined) continue;
       send(this.clients[uuid].ws, { type: "start", data: lobby.game.players });
     }
     return { ok: true };
+  }
+
+  static makeMove(pid, move) {
+    const lobby = this.lobbies[this.clients[pid].lobby];
+    if (lobby.running == false) return;
+    if (lobby.game.checkValidMove(move)) {
+      lobby.game.makeMove(move);
+      for (const uuid of lobby.players) {
+        if (uuid == undefined) continue;
+        send(this.clients[uuid].ws, { type: "move", move: move });
+      }
+      //check for win here, broadcast it to everyone, stop the game
+      if (lobby.game.checkEnd()) {
+        lobby.running = false;
+        for (const uuid of lobby.players) {
+          if (uuid == undefined) continue;
+          send(this.clients[uuid].ws, {
+            type: "end",
+            data: lobby.game.getScores(),
+          });
+        }
+      }
+    }
+  }
+  // add a bot to the given lobby id (extremely fragile)
+  static botIndex = 1;
+  static addBot(pid) {
+    const id = this.clients[pid].lobby;
+    const botID = `bot${this.botIndex}`;
+    this.newClient(botID);
+    this.botIndex++;
+    this.setClientInfo(botID, {
+      username: botID,
+      cardColor: "red",
+      cardDesign: "none",
+    });
+    this.assignClient(botID, id);
+    this.updatePlayerList(id);
+    setTimeout(() => {
+      setInterval((f) => {
+        const lobby = GameServer.lobbies[id];
+        if (!lobby.running) return;
+        GameServer.makeMove(
+          botID,
+          AGENT.getMove(lobby.game, GameServer.clients[botID].gameID),
+        );
+      }, 1200);
+    }, Math.random() * 1000);
   }
 }
 

@@ -85,6 +85,13 @@ function onMessage(e) {
     case "startfailed":
       break;
     case "start":
+      EventHandler.raiseEvent("start", { data: e.data });
+      break;
+    case "move":
+      EventHandler.raiseEvent("makemove", e);
+      break;
+    case "end":
+      EventHandler.raiseEvent("gameover", e);
       break;
     default:
       throw new Error(

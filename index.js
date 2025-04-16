@@ -98,7 +98,10 @@ function handleMessage(wss, ws, m) {
       }
       break;
     case "addbot":
-      console.log("addbot not implemented");
+      GameServer.addBot(message.uuid);
+      break;
+    case "move":
+      GameServer.makeMove(message.uuid, message.move);
       break;
     default:
       console.log(`invalid message: ${message}`);

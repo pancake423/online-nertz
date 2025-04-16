@@ -43,7 +43,7 @@ class MoveTracker {
     // attempt to make the move, if valid
     const move = this.#getMove();
     if (State.game.checkValidMove(move)) {
-      EventHandler.raiseEvent("makemove", { move: move });
+      EventHandler.raiseEvent("sendmove", { move: move });
     }
   }
 

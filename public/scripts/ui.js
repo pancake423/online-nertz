@@ -9,6 +9,9 @@ EventHandler.addEventListener("joinlobby", (e) => {
   document.getElementById("lobby-code-display").value = e.id;
   showPage("lobby-menu");
 });
+EventHandler.addEventListener("start", (e) => {
+  closeMenu();
+});
 EventHandler.addEventListener("updateplayerlist", () => {
   updatePlayerList(State.playerInfo);
   if (State.host) {
@@ -92,10 +95,14 @@ function updatePlayerList(data) {
 }
 
 function showPage(pageID) {
+  closeMenu();
+  document.getElementById(pageID).classList.remove("hidden");
+}
+
+function closeMenu() {
   Array(...document.getElementsByClassName("menu")).forEach((element) => {
     element.classList.add("hidden");
   });
-  document.getElementById(pageID).classList.remove("hidden");
 }
 
 function filterLobbyCode(code) {

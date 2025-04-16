@@ -28,7 +28,7 @@ function loadGame(dataString) {
       ["red", "classic"],
       ["yellow", "classic"],
       ["green", "classic"],
-    ].splice(data.deal.length, Infinity),
+    ].slice(4 - data.deal.length, Infinity),
   );
 }
 window.loadGame = loadGame;

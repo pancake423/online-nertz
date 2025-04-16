@@ -37,7 +37,6 @@ class Agent {
     // filters out useless moves (hopefully for good!)
     moves = moves.filter((v, i) => weights[i][0] != -1);
     weights = weights.filter((v, i) => v[0] != -1);
-
     const scores = weights.map((w) => dot(this.weights, w));
     return moves[maxIdx(scores)];
   }
@@ -208,6 +207,7 @@ function isUselessMove(before, after, move) {
   // are the same.
 
   if (!(move[2] == PILES.WORK && move[4] == PILES.WORK)) return false;
+  if (before.players[move[0]].workPiles[move[5]].length == 0) return true;
   const fromPile = after.players[move[0]].workPiles[move[3]];
   const toPile = before.players[move[0]].workPiles[move[5]];
   if (fromPile.length == 0 && toPile.length == 0) return true; // means we're moving cards from one empty pile to another
