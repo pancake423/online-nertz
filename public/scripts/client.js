@@ -5,9 +5,9 @@ call an event whenever a message is recieved
 have a type field that determines how the message is handled
 */
 
-import { State } from "/scripts/state.js";
-import { UI } from "/scripts/ui.js";
-import { EventHandler } from "/scripts/events.js";
+import { State } from "./state.js";
+import { UI } from "./ui.js";
+import { EventHandler } from "./events.js";
 
 const UUID_LENGTH = 16;
 

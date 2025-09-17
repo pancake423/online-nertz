@@ -1,7 +1,7 @@
-import { PILES } from "/shared/game-logic.js";
-import { EventHandler } from "/scripts/events.js";
-import * as renderer from "/scripts/draw.js";
-import { State } from "/scripts/state.js";
+import { PILES } from "../shared/game-logic.js";
+import { EventHandler } from "./events.js";
+import * as renderer from "./draw.js";
+import { State } from "./state.js";
 /*
 recieves updates from card interaction, tells renderer what to do
 makes moves when cards are dropped in the right ways.

@@ -8,14 +8,14 @@
 
 */
 
-import { Game } from "/shared/game-logic.js";
-import * as renderer from "/scripts/draw.js";
-import { EventHandler } from "/scripts/events.js";
-import * as cardInteraction from "/scripts/card-interaction.js";
-import { MoveTracker } from "/scripts/move-tracker.js"; // importing these register events
-import { State } from "/scripts/state.js";
-import { Client } from "/scripts/client.js";
-import { UI } from "/scripts/ui.js";
+import { Game } from "../shared/game-logic.js";
+import * as renderer from "./draw.js";
+import { EventHandler } from "./events.js";
+import * as cardInteraction from "./card-interaction.js";
+import { MoveTracker } from "./move-tracker.js"; // importing these register events
+import { State } from "./state.js";
+import { Client } from "./client.js";
+import { UI } from "./ui.js";
 
 // some networking code eventually is going to handle the event when you request to make a move
 EventHandler.addEventListener("sendmove", (e) =>

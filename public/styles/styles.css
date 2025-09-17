@@ -1,6 +1,6 @@
 @font-face {
     font-family: "Organo";
-    src: url("/assets/Organo.ttf");
+    src: url("../assets/Organo.ttf");
 }
 
 :root {

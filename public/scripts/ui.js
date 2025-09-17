@@ -1,5 +1,5 @@
-import { EventHandler } from "/scripts/events.js";
-import { State } from "/scripts/state.js";
+import { EventHandler } from "./events.js";
+import { State } from "./state.js";
 
 EventHandler.addEventListener("joinfailed", (e) => {
   // todo: an actual interface for this at some point
