@@ -1,8 +1,8 @@
-import * as glr from "./gl-draw.js";
-import * as ss from "./spritesheet.js";
-import { CARD_W, CARD_H } from "./card-renderer.js";
-import { State } from "./state.js";
-import { PILES } from "../shared/game-logic.js";
+import * as glr from "scripts/gl-draw.js";
+import * as ss from "scripts/spritesheet.js";
+import { CARD_W, CARD_H } from "scripts/card-renderer.js";
+import { State } from "scripts/state.js";
+import { PILES } from "shared/game-logic.js";
 
 // scaling factor on canvases for performance reasons.
 // higher number = more scaling = lower res

@@ -5,9 +5,9 @@ call an event whenever a message is recieved
 have a type field that determines how the message is handled
 */
 
-import { State } from "./state.js";
-import { UI } from "./ui.js";
-import { EventHandler } from "./events.js";
+import { State } from "scripts/state.js";
+import { UI } from "scripts/ui.js";
+import { EventHandler } from "scripts/events.js";
 
 const UUID_LENGTH = 16;
 
@@ -31,7 +31,7 @@ const Client = Object.seal({
     Client.sendData({ type: "joinserver", id: id });
   },
   connect: () => {
-    Client.webSocket = new WebSocket("/");
+    Client.webSocket = new WebSocket("/projects/nertz/");
     Client.webSocket.onopen = () => {
       Client.sendData({ type: "newuser" });
     };

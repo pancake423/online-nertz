@@ -5,7 +5,7 @@ also maintains a lookup of where to find each card face.
 There are four 5x3 spritesheets.
 There is space for up to 60 card faces- 52 for the fronts, and up to 8 players.
 */
-import * as cr from "./card-renderer.js";
+import * as cr from "scripts/card-renderer.js";
 
 let CARD_LOOKUP = {};
 const SHEET_DIMENSIONS = [5, 3]; // 5 wide, 3 high (in cards)

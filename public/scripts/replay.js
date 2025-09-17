@@ -1,6 +1,6 @@
-import { Game } from "../shared/game-logic.js";
-import * as renderer from "./draw.js";
-import { State } from "./state.js";
+import { Game } from "shared/game-logic.js";
+import * as renderer from "scripts/draw.js";
+import { State } from "scripts/state.js";
 
 let moveList = [];
 let moveIdx = 0;

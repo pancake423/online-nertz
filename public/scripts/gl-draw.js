@@ -1,7 +1,7 @@
-import { initProgram, initBuffer, getUniformLocations } from "./gl-utils.js";
+import { initProgram, initBuffer, getUniformLocations } from "scripts/gl-utils.js";
 
-import { mat3, mat4, quat, vec3 } from "/gl-matrix/index.js";
-import { CARD_W, CARD_H } from "/scripts/card-renderer.js";
+import { mat3, mat4, quat, vec3 } from "gl-matrix/index.js";
+import { CARD_W, CARD_H } from "scripts/card-renderer.js";
 
 let GL;
 let PROGRAM;
